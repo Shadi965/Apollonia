@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  apollo:
+    image: apollo
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ~/music:/mnt/music
+      - ./build/Apollonia:/usr/local/bin/Apollonia
