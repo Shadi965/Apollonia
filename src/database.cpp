@@ -77,7 +77,7 @@ void Database::updateDatabase(const std::string& musicFolder) {
             TagLib::Tag* tag = fileRef.tag();
             std::string title = tag->title().to8Bit(true);
             std::string artist = tag->artist().to8Bit(true);
-            int duration = fileRef.audioProperties()->length();
+            int duration = fileRef.audioProperties()->lengthInSeconds();
 
             insert.bind(1, title);
             insert.bind(2, artist);
