@@ -18,8 +18,12 @@ public:
     Database(const std::string& dbPath);
     std::vector<Song> getAllSongs();
     Song getSongById(int id);
+
+    void updateDatabase(const std::string& musicFolder);
+
 private:
     SQLite::Database db;
+    
 };
 
 #endif // DATABASE_H

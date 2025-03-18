@@ -14,4 +14,5 @@ target_link_libraries(Apollonia
                       sqlite3
                       pthread
                       dl
-                      )
+                      tag
+                      z)
