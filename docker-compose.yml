@@ -7,3 +7,4 @@ services:
     volumes:
       - ~/music:/mnt/music
       - ./build/Apollonia:/usr/local/bin/Apollonia
+      - ./build/songs.db:/var/lib/Apollonia/songs.db
