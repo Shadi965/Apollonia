@@ -1,46 +1,38 @@
 #include "api.h"
-#include <nlohmann/json.hpp>
 #include <fstream>
 #include <sstream>
 
-void handleGetAllSongs(const crow::request& req, crow::response& res, Database& db) {
+crow::json::wvalue handleGetAllSongs(Database& db) {
     auto songs = db.getAllSongs();
-    nlohmann::json jsonSongs = nlohmann::json::array();
+    crow::json::wvalue songsJSON(songs.size());
 
-    for (const auto& song : songs) {
-        jsonSongs.push_back({
-            {"id", song.id},
-            {"title", song.title},
-            {"artist", song.artist},
-            {"file", song.file},
-            {"duration", song.duration}
-        });
+    for (size_t i = 0; i < songs.size(); ++i) {
+        songsJSON[i]["id"] = songs[i].id;
+        songsJSON[i]["title"] = songs[i].title;
+        songsJSON[i]["artist"] = songs[i].artist;
+        songsJSON[i]["file"] = songs[i].file;
+        songsJSON[i]["duration"] = songs[i].duration;
     }
 
-    res.set_header("Content-Type", "application/json");
-    res.write(jsonSongs.dump());
-    res.end();
+    return songsJSON;
 }
 
-void handleGetSongById(const crow::request& req, crow::response& res, Database& db, int id) {
+crow::json::wvalue handleGetSongById(Database& db, int id) {
     auto song = db.getSongById(id);
+
     if (song.id == -1) {
-        res.code = 404;
-        res.end("Song not found");
-        return;
+        return crow::json::wvalue("Song not found");
     }
 
-    nlohmann::json jsonSong = {
-        {"id", song.id},
-        {"title", song.title},
-        {"artist", song.artist},
+    crow::json::wvalue songJSON = {
+        {"duration", song.duration},
         {"file", song.file},
-        {"duration", song.duration}
+        {"artist", song.artist},
+        {"title", song.title},
+        {"id", song.id},
     };
 
-    res.set_header("Content-Type", "application/json");
-    res.write(jsonSong.dump());
-    res.end();
+    return songJSON;
 }
 
 void handleStream(const crow::request& req, crow::response& res, Database& db, int id) {
@@ -103,7 +95,6 @@ void handleDownload(const crow::request& req, crow::response& res, Database& db,
 }
 
 void setupRoutes(crow::SimpleApp& app, Database& db) {
-    using json = nlohmann::json;
 
     CROW_ROUTE(app, "/stream/<int>")
     ([&db](const crow::request& req, crow::response& res, int id){
@@ -115,11 +106,11 @@ void setupRoutes(crow::SimpleApp& app, Database& db) {
         handleDownload(req, res, db, id);
     });
 
-    CROW_ROUTE(app, "/songs")([&db](const crow::request& req, crow::response& res) {
-        handleGetAllSongs(req, res, db);
+    CROW_ROUTE(app, "/songs")([&db]() {
+        return handleGetAllSongs(db);
     });
 
-    CROW_ROUTE(app, "/songs/<int>")([&db](const crow::request& req, crow::response& res, int id) {
-        handleGetSongById(req, res, db, id);
+    CROW_ROUTE(app, "/songs/<int>")([&db](int id) {
+        return handleGetSongById(db, id);
     });
 }
