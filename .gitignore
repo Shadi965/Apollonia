@@ -132,7 +132,7 @@ dkms.conf
 
 
 # VS Code
-.vscode
+.vscode/
 
 # CMake
 CMakeFiles/
