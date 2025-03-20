@@ -51,7 +51,7 @@ Song Database::getSongById(int id) {
 
 void Database::updateDatabase(const std::string& musicFolder) {
     std::set<std::string> filesInFolder;
-    for (const auto& entry : std::filesystem::directory_iterator(musicFolder))
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(musicFolder))
         if (entry.is_regular_file())
             filesInFolder.insert(entry.path().string());
 
