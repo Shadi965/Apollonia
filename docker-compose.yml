@@ -1,10 +1,10 @@
 services:
-  apollo:
+  apollonia:
     image: apollo
     ports:
       - "80:80"
       - "8080:8080"
     volumes:
-      - ~/music:/mnt/music
+      - "/mnt/c/Users/Shadi/Music/Apple Music/Media/Music:/mnt/music"
       - ./build/Apollonia:/usr/local/bin/Apollonia
       - ./build/songs.db:/var/lib/Apollonia/songs.db
