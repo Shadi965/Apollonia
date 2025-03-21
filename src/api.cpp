@@ -56,22 +56,29 @@ void handleStream(const crow::request& req, crow::response& res, Database& db, i
 
     std::string rangeHeader = req.get_header_value("Range");
     std::streampos start = 0;
+    std::streampos end = fileSize - std::streamoff(1);
     if (!rangeHeader.empty()){
-        std::istringstream rangeStream(rangeHeader.substr(6));
-        start = std::stoll(rangeHeader.substr(6));
+        size_t dashPos = rangeHeader.find('-');
+        if (dashPos != std::string::npos){
+            start = std::stoll(rangeHeader.substr(6, dashPos - 6));
+            if (dashPos + 1 < rangeHeader.size())
+                end = std::stoll(rangeHeader.substr(dashPos + 1));
+        }
+
+        if (end >= fileSize) end = fileSize - std::streamoff(1);
+        if (start > end) start = end;
     }
 
     file.seekg(start);
 
-    std::ostringstream buffer;
-    buffer << file.rdbuf();
-    res.body = buffer.str();
+    std::vector<char> buffer(end - start + 1);
+    file.read(buffer.data(), buffer.size());
 
+    res.body.assign(buffer.begin(), buffer.end());
     res.set_header("Content-Type", "audio/mpeg");
     res.set_header("Accept-Ranges", "bytes");
     res.set_header("Content-Range", "bytes " + std::to_string(start) + "-" + 
-                   std::to_string(static_cast<std::streamoff>(fileSize) - 1) + "/" + 
-                   std::to_string(static_cast<std::streamoff>(fileSize)));
+                   std::to_string(end) + "/" + std::to_string(fileSize));
     res.code = 206;
     res.end();
 }
