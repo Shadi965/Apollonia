@@ -1,11 +1,12 @@
 #define CROW_MAIN
-#include "crow.h"
+#include <crow.h>
 #include "database.h"
 #include "api.h"
 #include <iostream>
 
 #define PORT 8080
-#define DB_PATH "/var/lib/Apollonia/songs.db"
+#define DB_PATH "./songs.db"
+#define JSON_PATH "./tracks_info.json"
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -17,7 +18,7 @@ int main(int argc, char* argv[]) {
     crow::SimpleApp app;
     Database db(DB_PATH);
 
-    db.updateDatabase(musicFolder);
+    db.updateDatabase(musicFolder, JSON_PATH);
     setupRoutes(app, db);
     app.port(PORT).multithreaded().run();
 

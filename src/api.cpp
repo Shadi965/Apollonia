@@ -12,6 +12,7 @@ crow::json::wvalue handleGetAllSongs(Database& db) {
         songsJSON[i]["artist"] = songs[i].artist;
         songsJSON[i]["file"] = songs[i].file;
         songsJSON[i]["duration"] = songs[i].duration;
+        songsJSON[i]["itunes_id"] = songs[i].itunesId;
     }
 
     return songsJSON;
@@ -25,6 +26,7 @@ crow::json::wvalue handleGetSongById(Database& db, int id) {
     }
 
     crow::json::wvalue songJSON = {
+        {"itunes_id", song.itunesId},
         {"duration", song.duration},
         {"file", song.file},
         {"artist", song.artist},
