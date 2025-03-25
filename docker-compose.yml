@@ -8,3 +8,5 @@ services:
       - "/mnt/c/Users/Shadi/Music/Apple Music/Media/Music:/mnt/music"
       - ./build/Apollonia:/usr/local/bin/Apollonia
       - ./build/songs.db:/var/lib/Apollonia/songs.db
+      - ./build/tracks_info.json:/var/lib/Apollonia/tracks_info.json
+
