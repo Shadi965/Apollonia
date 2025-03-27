@@ -7,9 +7,9 @@
 #include <nlohmann/json.hpp>
 #include <list>
 
-// extern "C" {
-// #include <libavformat/avformat.h>
-// }
+extern "C" {
+    #include <libavformat/avformat.h>
+}
 
 #define CREATE_TABLE_IF_NOT_EXISTS "CREATE TABLE IF NOT EXISTS songs (\
     id INTEGER PRIMARY KEY, title TEXT, artist TEXT, album_artist TEXT,\
@@ -32,9 +32,15 @@
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 
+int64_t last_write_time(const std::string& path);
+std::map<std::string, int64_t> filesChangedDatesFromDir(const std::string& dir);
+void findItunesId(Song& song, std::map<std::string, int>& itunesIds);
+Song extractMetadata(AVFormatContext* formatCtx, std::pair<std::string, int64_t> fileChangedDate, std::map<std::string, int>& itunesIds);
+std::map<std::string, int> loadJsonMetadata(const std::string& jsonPath);
 
-Database::Database(const std::string& dbPath) : db(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
+Database::Database(const std::string& dbPath, const std::string& musicFolder, const std::string& jsonPath = "") : db(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
     db.exec(CREATE_TABLE_IF_NOT_EXISTS);
+    checkUpdates(musicFolder, jsonPath);
 }
 
 std::vector<Song> Database::getAllSongs() {
@@ -73,24 +79,29 @@ Song Database::getSongById(int id) {
     
 }
 
-int64_t Database::last_write_time(const std::string& path) {
-    auto ftime = std::filesystem::last_write_time(path);
-    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-        ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now()
-    );
-    return std::chrono::system_clock::to_time_t(sctp);
+void Database::checkUpdates(const std::string& musicFolder, const std::string& jsonPath) {
+    std::map<std::string, int64_t> filesInFolder = filesChangedDatesFromDir(musicFolder);
+
+    filterFilesWithoutChanges(filesInFolder);
+
+    std::map<std::string, int> itunesIds = loadJsonMetadata(jsonPath);
+
+    AVFormatContext* formatCtx = nullptr;
+    av_log_set_level(AV_LOG_ERROR);
+    for (auto file : filesInFolder) {
+        if (avformat_open_input(&formatCtx, file.first.c_str(), nullptr, nullptr) < 0)
+            continue;
+        if (avformat_find_stream_info(formatCtx, nullptr) < 0) {
+            avformat_close_input(&formatCtx);
+            continue;
+        }
+        Song song = extractMetadata(formatCtx, file, itunesIds);
+        insertSongIntoDb(song);
+        avformat_close_input(&formatCtx);
+    }
 }
 
-std::map<std::string, int64_t> Database::filesChangedDatesFromDir(const std::string& dir) {
-    std::map<std::string, int64_t> filesInFolder;
-    std::string filePath;
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(dir))
-        if (entry.is_regular_file()) {
-            filePath = entry.path().string();
-            filesInFolder.insert({filePath, last_write_time(filePath)});
-        }
-    return filesInFolder;
-}
+
 
 void Database::deleteSongsByIds(std::list<int>& ids) {
     SQLite::Statement stmt(db, DELETE_SONG);
@@ -119,12 +130,6 @@ void Database::filterFilesWithoutChanges(std::map<std::string, int64_t>& filesIn
     }
 
     deleteSongsByIds(toDeleteIds);
-}
-
-void Database::findItunesId(Song& song, std::map<std::string, int>& itunesIds) {
-    std::string key(song.artist + "|" + song.album + "|" + song.title);
-    auto it = itunesIds.find(key);
-    song.itunesId = it != itunesIds.end() ? it->second : -1;
 }
 
 void Database::insertSongIntoDb(Song& song) {
@@ -156,7 +161,33 @@ void Database::insertSongIntoDb(Song& song) {
     insert.exec();
 }
 
-Song Database::extractMetadata(AVFormatContext* formatCtx, std::pair<std::string, int64_t> fileChangedDate, std::map<std::string, int>& itunesIds) {
+
+int64_t last_write_time(const std::string& path) {
+    auto ftime = std::filesystem::last_write_time(path);
+    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+        ftime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now()
+    );
+    return std::chrono::system_clock::to_time_t(sctp);
+}
+
+std::map<std::string, int64_t> filesChangedDatesFromDir(const std::string& dir) {
+    std::map<std::string, int64_t> filesInFolder;
+    std::string filePath;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(dir))
+        if (entry.is_regular_file()) {
+            filePath = entry.path().string();
+            filesInFolder.insert({filePath, last_write_time(filePath)});
+        }
+    return filesInFolder;
+}
+
+void findItunesId(Song& song, std::map<std::string, int>& itunesIds) {
+    std::string key(song.artist + "|" + song.album + "|" + song.title);
+    auto it = itunesIds.find(key);
+    song.itunesId = it != itunesIds.end() ? it->second : -1;
+}
+
+Song extractMetadata(AVFormatContext* formatCtx, std::pair<std::string, int64_t> fileChangedDate, std::map<std::string, int>& itunesIds) {
     AVDictionaryEntry* tag = nullptr;
     Song song;
     if ((tag = av_dict_get(formatCtx->metadata, "title", nullptr, 0))) song.title = tag->value;
@@ -184,7 +215,7 @@ Song Database::extractMetadata(AVFormatContext* formatCtx, std::pair<std::string
     return song;
 }
 
-std::map<std::string, int> Database::loadJsonMetadata(const std::string& jsonPath) {
+std::map<std::string, int> loadJsonMetadata(const std::string& jsonPath) {
     std::map<std::string, int> metadata;
     std::ifstream file(jsonPath);
     if (!file) return metadata;
@@ -196,26 +227,4 @@ std::map<std::string, int> Database::loadJsonMetadata(const std::string& jsonPat
         metadata[key] = id;
     }
     return metadata;
-}
-
-
-void Database::updateDatabase(const std::string& musicFolder, const std::string& jsonPath) {
-    std::map<std::string, int64_t> filesInFolder = filesChangedDatesFromDir(musicFolder);
-
-    filterFilesWithoutChanges(filesInFolder);
-
-    std::map<std::string, int> itunesIds = loadJsonMetadata(jsonPath);
-
-    AVFormatContext* formatCtx = nullptr;
-    for (auto file : filesInFolder) {
-        if (avformat_open_input(&formatCtx, file.first.c_str(), nullptr, nullptr) < 0)
-            continue;
-        if (avformat_find_stream_info(formatCtx, nullptr) < 0) {
-            avformat_close_input(&formatCtx);
-            continue;
-        }
-        Song song = extractMetadata(formatCtx, file, itunesIds);
-        insertSongIntoDb(song);
-        avformat_close_input(&formatCtx);
-    }
 }

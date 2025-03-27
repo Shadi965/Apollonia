@@ -92,7 +92,7 @@ void handleDownload(const crow::request& req, crow::response& res, Database& db,
         res.end("Song not found");
         return;
     }
-    res.set_header("Content-Disposition", "attachment; filename=\"" + song.title + ".mp3\"");
+    res.set_header("Content-Disposition", "attachment; filename=\"" + song.title + ".m4a\"");
     std::ifstream file(song.file, std::ios::binary);
     if (!file) {
         res.code = 500;

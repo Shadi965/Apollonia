@@ -8,21 +8,23 @@ add_executable(Apollonia src/main.cpp
 src/database.cpp
 src/api.cpp)
 
-add_custom_command(TARGET Apollonia PRE_BUILD
-    COMMAND echo "Остановка контейнера"
-    COMMAND docker-compose down
-)
+# add_custom_command(TARGET Apollonia PRE_BUILD
+#     COMMAND echo "Остановка контейнера"
+#     COMMAND docker-compose down
+# )
 
-add_custom_command(TARGET Apollonia POST_BUILD
-    COMMAND echo "Запуск контейнера с сервером"
-    COMMAND docker-compose up -d
-)
+# add_custom_command(TARGET Apollonia POST_BUILD
+#     COMMAND echo "Запуск контейнера с сервером"
+#     COMMAND docker-compose up -d
+# )
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 
 target_link_libraries(Apollonia
                       SQLiteCpp
                       sqlite3
+                      avformat
+                      avutil
                       pthread
                       dl
                       tag

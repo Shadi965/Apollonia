@@ -16,9 +16,8 @@ int main(int argc, char* argv[]) {
     
     std::string musicFolder = argv[1];
     crow::SimpleApp app;
-    Database db(DB_PATH);
+    Database db(DB_PATH, musicFolder, JSON_PATH);
 
-    db.updateDatabase(musicFolder, JSON_PATH);
     setupRoutes(app, db);
     app.port(PORT).multithreaded().run();
 
