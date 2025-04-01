@@ -142,3 +142,4 @@ CMakeCache.txt
 # other
 thirdparty/
 build/
+old/
