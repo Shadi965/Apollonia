@@ -4,9 +4,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 
 include_directories(include)
-add_executable(Apollonia src/main.cpp
-src/database.cpp
-src/api.cpp)
+include_directories(include/model/file_service)
+include_directories(include/model/repository)
+include_directories(include/model/repository/dao)
+
+file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+
+add_executable(Apollonia ${SOURCES})
+
 
 # add_custom_command(TARGET Apollonia PRE_BUILD
 #     COMMAND echo "Остановка контейнера"
