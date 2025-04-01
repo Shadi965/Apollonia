@@ -83,7 +83,7 @@ public:
     std::vector<std::pair<int, std::string>> getSongLyrics( const std::string& artistName,
                                                             const std::string& albumName,
                                                             const std::string& title) const {
-        getSongLyrics(artistName + albumName + title);
+        return getSongLyrics(artistName + albumName + title);
     }
 
 

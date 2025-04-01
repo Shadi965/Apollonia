@@ -150,7 +150,6 @@ int64_t FileService::last_write_time(const std::string& path) {
 const std::map<std::string, std::string>& FileService::scanDirWithLyricJsons(const std::string& directory) {
     lyricFiles.clear();
     std::string filePath;
-    std::string filePath;
     std::ifstream file;
     for (const auto& entry : std::filesystem::directory_iterator(directory)) {
         if (entry.path().extension() == ".json")
@@ -168,7 +167,7 @@ const std::map<std::string, std::string>& FileService::scanDirWithLyricJsons(con
             continue;
         }
 
-        lyricFiles.insert(getTrackFullName(jsonData), filePath);
+        lyricFiles.insert({getTrackFullName(jsonData), filePath});
     }
     return lyricFiles;
 }
