@@ -17,11 +17,12 @@ include_directories(include
 
 add_library(dao ${DAO_SOURCES})
 add_library(fs src/model/file_service.cpp)
-add_library(song_repo src/model/repository/song_repository.cpp
+add_library(db_manager src/model/repository/db_manager.cpp)
+add_library(song_repos src/model/repository/song_repository.cpp
                             src/model/repository/song_repository.cpp)
 
 
-# add_executable(Apollonia ${SOURCES})
+add_executable(Apollonia src/main.cpp)
 
 
 # add_custom_command(TARGET Apollonia PRE_BUILD
@@ -36,18 +37,23 @@ add_library(song_repo src/model/repository/song_repository.cpp
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 
-target_link_libraries(song_repo
-                        dao)
+target_link_libraries(song_repos dao fs)
+
+target_link_libraries(db_manager SQLiteCpp)
 
 target_link_libraries(dao
                       SQLiteCpp
-                      sqlite3
-                      pthread)
+                    #   pthread
+                      )
 
 target_link_libraries(fs
                       avformat
                       avutil
-                      pthread)
+                    #   pthread
+                      )
+
+target_link_libraries(Apollonia db_manager song_repos)
+
 
 # target_link_libraries(Apollonia
 #                       SQLiteCpp
