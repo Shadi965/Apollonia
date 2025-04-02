@@ -27,6 +27,10 @@ std::vector<Album> SongRepository::getAlbums() {
     return _albumDao.getAllAlbums();
 }
 
+void SongRepository::initDB(const std::string& musicDir, const std::string& lyricsJsonDir) {
+    fillDbWithSongsFromDir(musicDir);
+    fillLyricsFromJsonsFromDir(lyricsJsonDir);
+}
 
 
 

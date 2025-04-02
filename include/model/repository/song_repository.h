@@ -27,6 +27,7 @@ public:
 
     std::vector<Album> getAlbums();
 
+    void initDB(const std::string& musicDir, const std::string& lyricsJsonDir);
 
 
 private:
