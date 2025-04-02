@@ -214,7 +214,7 @@ std::vector<std::pair<int, std::string>> FileService::parseLyrics(const json& js
                 for (const auto& line : section["lines"]) {
                     lyrics.push_back({
                         static_cast<int>(line["time"]["total"].get<double>() * 1000),
-                        line["text"].get<std::string>()
+                        line.contains("text") ? line["text"].get<std::string>() : ""
                     });
                 }
             }
@@ -222,7 +222,7 @@ std::vector<std::pair<int, std::string>> FileService::parseLyrics(const json& js
             for (const auto& line : data[lyricsKey]) {
                 lyrics.push_back({
                     static_cast<int>(line["time"]["total"].get<double>() * 1000),
-                    line["text"].get<std::string>()
+                    line.contains("text") ? line["text"].get<std::string>() : ""
                 });
             }
         }
