@@ -11,6 +11,7 @@
 
 int FileService::inputOpen(const std::string& file) {
     int res = 0;
+    av_log_set_level(AV_LOG_ERROR);
     res = avformat_open_input(&formatCtx, file.c_str(), nullptr, nullptr);
     if (res < 0)
         return res;
