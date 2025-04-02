@@ -41,14 +41,14 @@ int64_t PlaylistDao::insertPlaylist(const Playlist& playlist) {
     return _db.getLastInsertRowid();
 }
 
-void PlaylistDao::updatePlaylistName(int playlistId, const std::string& newName) {
+int PlaylistDao::updatePlaylistName(int playlistId, const std::string& newName) {
     SQLite::Statement query(_db, "UPDATE playlists SET name = ? WHERE id = ?");
     query.bind(1, newName);
     query.bind(2, playlistId);
 
-    // TODO: Реализовать нормальные исключения
-    if (!query.executeStep())
-        throw std::runtime_error("No playlist found with id: " + std::to_string(playlistId));
+    query.executeStep();
+
+    return _db.getChanges();
 }
 
 void PlaylistDao::deletePlaylist(int playlistId) {

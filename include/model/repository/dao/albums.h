@@ -47,7 +47,7 @@ public:
 
     std::vector<int> getAllAlbumsIds();
     
-    void updateAlbumDateAndGenre(int albumId, const std::string& newDate, const std::string& newGenre);
+    int updateAlbumDateAndGenre(int albumId, const std::string& newDate, const std::string& newGenre);
 
 private:
     SQLite::Database& _db;

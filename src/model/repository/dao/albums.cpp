@@ -105,13 +105,12 @@ std::vector<int> AlbumDao::getAllAlbumsIds() {
         return ids;
     }
 
-void AlbumDao::updateAlbumDateAndGenre(int albumId, const std::string& newDate, const std::string& newGenre) {
+int AlbumDao::updateAlbumDateAndGenre(int albumId, const std::string& newDate, const std::string& newGenre) {
         SQLite::Statement query(_db, "UPDATE albums SET date = ?, genre = ? WHERE id = ?");
         query.bind(1, newDate);
         query.bind(2, newGenre);
         query.bind(3, albumId);
 
-        // TODO: Реализовать нормальные исключения
-        if (!query.executeStep())
-            throw std::runtime_error("No album found with id: " + std::to_string(albumId));
+        query.executeStep();
+        return _db.getChanges();
     }

@@ -25,7 +25,7 @@ public:
 
     int64_t insertPlaylist(const Playlist& playlist);
 
-    void updatePlaylistName(int playlistId, const std::string& newName);
+    int updatePlaylistName(int playlistId, const std::string& newName);
 
     void deletePlaylist(int playlistId);
 
