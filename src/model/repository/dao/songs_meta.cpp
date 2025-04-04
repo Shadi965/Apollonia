@@ -10,9 +10,28 @@
 //     file TEXT UNIQUE, 
 //     FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE);
 
+std::vector<SongMeta> SongMetaDao::getAllSongsData() {
+    std::vector<SongMeta> songsMeta;
+    SQLite::Statement query(_db, "SELECT * FROM songs_meta");
+
+    while (query.executeStep()) {
+        songsMeta.push_back({
+            query.getColumn(0).getInt(),
+            query.getColumn(1).getInt(),
+            query.getColumn(2).getInt(),
+            query.getColumn(3).getInt(),
+            query.getColumn(4).getInt(),
+            query.getColumn(5).getInt(),
+            query.getColumn(6).getString()
+        });
+    }
+
+    return songsMeta;
+}
+
 SongMeta SongMetaDao::getSongDataById(int songId) {
     SQLite::Statement query(_db, "SELECT song_id, duration, bitrate, channels, sample_rate, last_modified, file "
-                                "FROM songs_meta WHERE id = ?");
+                                "FROM songs_meta WHERE song_id = ?");
     query.bind(1, songId);
 
     // TODO: Реализовать нормальные исключения
@@ -28,6 +47,17 @@ SongMeta SongMetaDao::getSongDataById(int songId) {
         query.getColumn(5).getInt(),
         query.getColumn(6).getString()
     };
+}
+
+int SongMetaDao::getSongDuration(int songId) {
+    SQLite::Statement query(_db, "SELECT duration FROM songs_meta WHERE song_id = ?");
+    query.bind(1, songId);
+
+    // TODO: Реализовать нормальные исключения
+    if (!query.executeStep()) 
+        throw std::runtime_error("No song metadata found with id: " + std::to_string(songId));
+
+    return query.getColumn(0).getInt();
 }
 
 

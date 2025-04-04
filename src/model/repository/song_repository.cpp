@@ -15,6 +15,15 @@ SongMeta SongRepository::getSongMetaInfo(int songId) {
     return _songMetaDao.getSongDataById(songId);
 }
 
+std::vector<SongMeta> SongRepository::getSongsMeta() {
+    return _songMetaDao.getAllSongsData();
+}
+
+
+int SongRepository::getSongDuration(int songId) {
+    return _songMetaDao.getSongDuration(songId);
+}
+
 std::string SongRepository::getSongPath(int songId) {
     return _songMetaDao.getFilePathBySongId(songId);
 }
@@ -27,11 +36,45 @@ std::vector<Album> SongRepository::getAlbums() {
     return _albumDao.getAllAlbums();
 }
 
+std::vector<LyricLine> SongRepository::getLyricsForSong(int songId) {
+    return _lyricsDao.getLyricsForSong(songId);
+}
+
 void SongRepository::initDB(const std::string& musicDir, const std::string& lyricsJsonDir) {
     fillDbWithSongsFromDir(musicDir);
     fillLyricsFromJsonsFromDir(lyricsJsonDir);
 }
 
+
+
+
+std::vector<Playlist> SongRepository::getAllPlaylists() {
+    return _playlistDao.getAllPlaylists();
+}
+
+int SongRepository::newPlaylist(const std::string& name) {
+    return _playlistDao.insertPlaylist({0, name});
+}
+
+bool SongRepository::changePlaylistName(int id, const std::string& newName) {
+    return _playlistDao.updatePlaylistName(id, newName) != 0;
+}
+
+void SongRepository::removePlaylist(int id) {
+    _playlistDao.deletePlaylist(id);
+}
+
+void SongRepository::addSongToPlaylist(int playlistId, int songId) {
+    _playlistSongDao.addSongToPlaylist(playlistId, songId);
+}
+
+void SongRepository::removeSongFromPlaylist(int playlistId, int songId) {
+    _playlistSongDao.removeSongFromPlaylist(playlistId, songId);
+}
+
+std::vector<int> SongRepository::getAllSongsFromPlaylist(int playlistId) {
+    return _playlistSongDao.getSongsInPlaylist(playlistId);
+}
 
 
 
@@ -103,7 +146,7 @@ void SongRepository::takeDataFromFile(const std::string& filePath) {
 
 void SongRepository::fixAlbums() {
     for (int albumId : _albumDao.getAllAlbumsIds()) {
-        std::string date = _songDao.getOldestSongDateInAlbum(albumId);
+        std::string date = _songDao.getNewestSongDateInAlbum(albumId);
         std::string genre = _songDao.getMostFrequentGenreInAlbum(albumId);
 
         _albumDao.updateAlbumDateAndGenre(albumId, date, genre);

@@ -74,6 +74,7 @@ void DatabaseManager::createPlaylistSongs() {
 
 void DatabaseManager::initDB() {
     db.exec("PRAGMA foreign_keys = ON;");
+    db.exec("PRAGMA journal_mode=WAL;");
 
     createAlbums();
     createSongInfo();

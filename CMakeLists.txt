@@ -11,6 +11,8 @@ set(DAO_SOURCES ${DAO_PATH}/albums.cpp
                 ${DAO_PATH}/songs.cpp)
 
 include_directories(include
+                    include/presenter
+                    include/view
                     include/model
                     include/model/repository
                     include/model/repository/dao)

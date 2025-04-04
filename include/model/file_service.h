@@ -90,6 +90,15 @@ public:
     static int64_t last_write_time(const std::string& path);
 
 
+    struct FileChunk {
+        std::vector<uint8_t> data;
+        size_t fullSize;
+        size_t start;
+        size_t end;
+    };
+
+    static FileChunk getFileRange(const std::string& filePath, size_t start, size_t end);
+
 private:
 
 std::string getTrackFullName(const json& jsonData) const;

@@ -3,7 +3,7 @@
 //     id INTEGER PRIMARY KEY, 
 //     name TEXT);
 
-std::vector<Playlist> PlaylistDao::getAllSongs() {
+std::vector<Playlist> PlaylistDao::getAllPlaylists() {
     std::vector<Playlist> playlists;
     SQLite::Statement query(_db, "SELECT * FROM playlists");
 

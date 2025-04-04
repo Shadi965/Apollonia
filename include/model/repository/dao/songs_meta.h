@@ -2,6 +2,7 @@
 #define SONG_META_DAO_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <vector>
 #include <stdexcept>
 
 // CREATE TABLE IF NOT EXISTS songs_meta (
@@ -29,8 +30,11 @@ public:
     SongMetaDao(SQLite::Database& db): _db(db) {};
 
 
+    std::vector<SongMeta> getAllSongsData();
+
     SongMeta getSongDataById(int songId);
 
+    int getSongDuration(int songId);
 
     int64_t insertSongData(const SongMeta& meta);
 

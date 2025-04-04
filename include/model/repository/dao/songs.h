@@ -44,7 +44,7 @@ public:
 
     void deleteSongById(int songId);
 
-    std::string getOldestSongDateInAlbum(int64_t albumId);
+    std::string getNewestSongDateInAlbum(int64_t albumId);
 
     std::string getMostFrequentGenreInAlbum(int64_t albumId);
     

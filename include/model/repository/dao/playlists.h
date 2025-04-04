@@ -18,7 +18,7 @@ class PlaylistDao {
 public:
     PlaylistDao(SQLite::Database& db): _db(db) {};
 
-    std::vector<Playlist> getAllSongs();
+    std::vector<Playlist> getAllPlaylists();
 
     Playlist getPlaylistById(int playlistId);
 

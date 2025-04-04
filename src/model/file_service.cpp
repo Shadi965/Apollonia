@@ -146,6 +146,30 @@ int64_t FileService::last_write_time(const std::string& path) {
 }
 
 
+FileService::FileChunk FileService::getFileRange(const std::string& filePath, size_t start, size_t end) {
+    std::ifstream file(filePath, std::ios::binary);
+    if (!file)
+        throw std::runtime_error("Failed to open file: " + filePath);
+
+    file.seekg(0, std::ios::end);
+    size_t fileSize = file.tellg();
+    if (start >= fileSize) {
+        throw std::runtime_error("Requested range out of file bounds");
+    }
+
+    if (end >= fileSize) {
+        end = fileSize - 1;
+    }
+
+    size_t readSize = end - start + 1;
+    std::vector<uint8_t> buffer(readSize);
+
+    file.seekg(start);
+    file.read(reinterpret_cast<char*>(buffer.data()), readSize);
+
+    return {buffer, fileSize, start, end};
+}
+
 
 
 const std::map<std::string, std::string>& FileService::scanDirWithLyricJsons(const std::string& directory) {

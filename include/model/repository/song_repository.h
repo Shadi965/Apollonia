@@ -9,17 +9,26 @@
 #include "albums.h"
 #include "lyrics.h"
 
+#include <playlists.h>
+#include <playlist_songs.h>
+
 class SongRepository {
 public:
     SongRepository(SQLite::Database& db)
-        : _songDao(db), _songMetaDao(db), _albumDao(db), _lyricsDao(db) {}
+        : _songDao(db), _songMetaDao(db), _albumDao(db), _lyricsDao(db), _playlistDao(db), _playlistSongDao(db) {
+
+        }
 
 
     Song getSongById(int songId);
 
     std::vector<Song> getSongs();
 
+    std::vector<SongMeta> getSongsMeta();
+
     SongMeta getSongMetaInfo(int songId);
+
+    int getSongDuration(int songId);
 
     std::string getSongPath(int songId);
 
@@ -27,7 +36,25 @@ public:
 
     std::vector<Album> getAlbums();
 
+
+    std::vector<LyricLine> getLyricsForSong(int songId);
+
     void initDB(const std::string& musicDir, const std::string& lyricsJsonDir);
+
+    std::vector<Playlist> getAllPlaylists();
+
+    int newPlaylist(const std::string& name);
+
+    bool changePlaylistName(int id, const std::string& newName);
+
+    void removePlaylist(int id);
+
+    void addSongToPlaylist(int playlistId, int songId);
+
+    void removeSongFromPlaylist(int playlistId, int songId);
+
+    std::vector<int> getAllSongsFromPlaylist(int playlistId);
+    
 
 
 private:
@@ -35,6 +62,8 @@ private:
     SongMetaDao _songMetaDao;
     AlbumDao _albumDao;
     LyricsDao _lyricsDao;
+    PlaylistDao _playlistDao;
+    PlaylistSongDao _playlistSongDao;
 
     int addAlbumIfNotExist(const FileService& fileService);
 

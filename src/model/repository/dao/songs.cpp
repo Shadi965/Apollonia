@@ -86,8 +86,8 @@ void SongDao::deleteSongById(int songId) {
     query.executeStep();
 }
 
-std::string SongDao::getOldestSongDateInAlbum(int64_t albumId) {
-    SQLite::Statement query(_db, "SELECT MIN(date) FROM songs WHERE album_id = ?");
+std::string SongDao::getNewestSongDateInAlbum(int64_t albumId) {
+    SQLite::Statement query(_db, "SELECT MAX(date) FROM songs WHERE album_id = ?");
     query.bind(1, albumId);
 
     if (query.executeStep())
