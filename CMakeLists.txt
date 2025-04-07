@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(Apollonia VERSION 0.1.0 LANGUAGES C CXX)
+project(Apollonia VERSION 0.3.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 
@@ -65,3 +65,23 @@ target_link_libraries(Apollonia dao pthread)
 #                       dl
 #                       tag
 #                       z)
+
+
+# add_library(fs src/model/file_service.cpp)
+# target_link_libraries(fs
+#                       avformat
+#                       avutil
+#                       pthread
+#                       )
+
+
+# add_library(db_manager src/model/repository/db_manager.cpp)
+# target_link_libraries(db_manager SQLiteCpp pthread)
+
+
+# add_library(apollo_repos src/model/repository/song_repository.cpp)
+# target_link_libraries(apollo_repos dao)
+
+
+# add_library(apollo_presenter src/presenter/song_presenter.cpp)
+# target_link_libraries(apollo_presenter apollo_repos)
