@@ -1,33 +1,31 @@
+#pragma once
+
 #ifndef PLAYLIST_DAO_H
 #define PLAYLIST_DAO_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
-#include <stdexcept>
 #include <vector>
+
+#include "repository_exceptions.h"
+#include "entities.h"
+
 
 // CREATE TABLE IF NOT EXISTS playlists (
 //     id INTEGER PRIMARY KEY, 
-//     name TEXT);
+//     name TEXT, 
+//     cover_path TEXT);
 
-struct Playlist {
-    int id;
-    std::string name;
-};
 
 class PlaylistDao {
 public:
-    PlaylistDao(SQLite::Database& db): _db(db) {};
+    PlaylistDao(SQLite::Database& db);
 
-    std::vector<Playlist> getAllPlaylists();
+    std::vector<PlaylistEntity> getAllPlaylists() const;
+    PlaylistEntity getPlaylistById(int playlistId) const;
 
-    Playlist getPlaylistById(int playlistId);
-
-
-    int64_t insertPlaylist(const Playlist& playlist);
-
-    int updatePlaylistName(int playlistId, const std::string& newName);
-
-    void deletePlaylist(int playlistId);
+    int insertPlaylist(const PlaylistEntity& playlist);
+    bool updatePlaylistName(int playlistId, const std::string& newName);
+    bool deletePlaylist(int playlistId);
 
 private:
     SQLite::Database& _db;

@@ -1,9 +1,14 @@
+#pragma once
+
 #ifndef SONG_META_DAO_H
 #define SONG_META_DAO_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <vector>
-#include <stdexcept>
+
+#include "repository_exceptions.h"
+#include "entities.h"
+
 
 // CREATE TABLE IF NOT EXISTS songs_meta (
 //     song_id INTEGER, 
@@ -15,30 +20,17 @@
 //     file TEXT UNIQUE, 
 //     FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE);
 
-struct SongMeta {
-    int songId;
-    int duration;
-    int bitrate;
-    int channels;
-    int sampleRate;
-    int lastModified;
-    std::string file;
-};
 
 class SongMetaDao {
 public:
-    SongMetaDao(SQLite::Database& db): _db(db) {};
+    SongMetaDao(SQLite::Database& db);
 
+    std::vector<SongMetaEntity> getAllSongsData() const;
+    SongMetaEntity getSongDataById(int songId) const;
+    int getSongDuration(int songId) const;
+    std::string getFilePathBySongId(int songId) const;
 
-    std::vector<SongMeta> getAllSongsData();
-
-    SongMeta getSongDataById(int songId);
-
-    int getSongDuration(int songId);
-
-    int64_t insertSongData(const SongMeta& meta);
-
-    std::string getFilePathBySongId(int songId);
+    bool insertSongData(const SongMetaEntity& meta);
 
 private:
     SQLite::Database& _db;

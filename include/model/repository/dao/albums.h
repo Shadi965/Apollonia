@@ -1,9 +1,14 @@
+#pragma once
+
 #ifndef ALBUM_DAO_H
 #define ALBUM_DAO_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
-#include <stdexcept>
 #include <vector>
+
+#include "repository_exceptions.h"
+#include "entities.h"
+
 
 // CREATE TABLE IF NOT EXISTS albums (
 //     id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -11,43 +16,27 @@
 //     artist TEXT, 
 //     track_count INTEGER, 
 //     disc_count INTEGER, 
-//     compilation INTEGER, 
+//     compilation BOOLEAN DEFAULT FALSE, 
 //     date TEXT, 
 //     copyright TEXT, 
 //     genre TEXT, 
+//     cover_path TEXT, 
 //     UNIQUE (title, artist));
 
-struct Album {
-    int id;
-    std::string title;
-    std::string artist;
-    int track_count;
-    int disc_count;
-    bool compilation;
-    std::string date;
-    std::string copyright;
-    std::string genre;
-};
 
 class AlbumDao {
 public:
-    AlbumDao(SQLite::Database& db): _db(db) {};
+    AlbumDao(SQLite::Database& db);
 
+    std::vector<AlbumEntity> getAllAlbums() const;
+    AlbumEntity getAlbumById(int albumId) const;
+    std::string getAlbumTitleById(int albumId) const;
+    std::vector<int> getAllAlbumsIds() const;
 
-    std::vector<Album> getAllAlbums();
+    int findAlbum(const std::string& artist, const std::string& title) const;
 
-    Album getAlbumById(int albumId);
-
-    std::string getAlbumTitleById(int albumId);
-
-
-    int64_t isAlbumExists(const std::string& artist, const std::string& title);
-    
-    int64_t insertAlbum(const Album& album);
-
-    std::vector<int> getAllAlbumsIds();
-    
-    int updateAlbumDateAndGenre(int albumId, const std::string& newDate, const std::string& newGenre);
+    int insertAlbum(const AlbumEntity& album);    
+    bool updateAlbumDateAndGenre(int albumId, const std::string& newDate, const std::string& newGenre);
 
 private:
     SQLite::Database& _db;

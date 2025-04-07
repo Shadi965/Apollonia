@@ -1,9 +1,13 @@
+#pragma once
+
 #ifndef SONG_DAO_H
 #define SONG_DAO_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
-#include <stdexcept>
 #include <vector>
+
+#include "repository_exceptions.h"
+#include "entities.h"
 
 // CREATE TABLE IF NOT EXISTS songs (
 //     id INTEGER PRIMARY KEY, 
@@ -17,38 +21,22 @@
 //     copyright TEXT, 
 //     genre TEXT, 
 //     FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE SET NULL);
-
-struct Song {
-    int id;
-    std::string title;
-    std::string artist;
-    std::string composer;
-    int albumId;
-    int track;
-    int disc;
-    std::string date;
-    std::string copyright;
-    std::string genre;
-};
+//
+// CREATE INDEX IF NOT EXISTS idx_songs_album_id ON songs(album_id);
 
 class SongDao {
 public:
-    SongDao(SQLite::Database& db): _db(db) {};
+    SongDao(SQLite::Database& db);
     
-    std::vector<Song> getAllSongs();
+    std::vector<SongEntity> getAllSongs() const;
+    SongEntity getSongById(int songId) const;
 
+    std::string getNewestSongDateInAlbum(int albumId) const;
+    std::string getMostFrequentGenreInAlbum(int albumId) const;
+    std::vector<SongEntity> getTitleArtistAlbumTuples() const;
 
-    Song getSongById(int songId);
-
-    int64_t insertSong(const Song& song);
-
-    void deleteSongById(int songId);
-
-    std::string getNewestSongDateInAlbum(int64_t albumId);
-
-    std::string getMostFrequentGenreInAlbum(int64_t albumId);
-    
-    std::vector<std::tuple<int, std::string, std::string, int>> getTitleArtistAlbumTuples();
+    int insertSong(const SongEntity& song);
+    bool deleteSongById(int songId);
 
 private:
     SQLite::Database& _db;

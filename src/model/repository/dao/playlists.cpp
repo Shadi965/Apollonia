@@ -1,58 +1,58 @@
 #include "playlists.h"
-// CREATE TABLE IF NOT EXISTS playlists (
-//     id INTEGER PRIMARY KEY, 
-//     name TEXT);
 
-std::vector<Playlist> PlaylistDao::getAllPlaylists() {
-    std::vector<Playlist> playlists;
+PlaylistDao::PlaylistDao(SQLite::Database& db): _db(db) {};
+
+std::vector<PlaylistEntity> PlaylistDao::getAllPlaylists() const {
+    std::vector<PlaylistEntity> playlists;
     SQLite::Statement query(_db, "SELECT * FROM playlists");
 
+    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         playlists.push_back({
             query.getColumn(0).getInt(),
-            query.getColumn(1).getString()
+            query.getColumn(1).getString(),
+            query.getColumn(2).getString()
         });
     }
 
     return playlists;
 }
-
-Playlist PlaylistDao::getPlaylistById(int playlistId) {
+PlaylistEntity PlaylistDao::getPlaylistById(int playlistId) const {
     SQLite::Statement query(_db, "SELECT * FROM playlists WHERE id = ?");
     query.bind(1, playlistId);
 
-    // TODO: Реализовать нормальные исключения
     if (!query.executeStep()) 
-        throw std::runtime_error("No playlist found with id: " + std::to_string(playlistId));
+        throw PlaylistNotFoundException(playlistId);
 
     return {
         query.getColumn(0).getInt(),
-        query.getColumn(1).getString()
+        query.getColumn(1).getString(),
+        query.getColumn(2).getString(),
     };
 }
 
-
-int64_t PlaylistDao::insertPlaylist(const Playlist& playlist) {
-    SQLite::Statement query(_db, "INSERT INTO playlists (name) VALUES (?)");
+int PlaylistDao::insertPlaylist(const PlaylistEntity& playlist) {
+    // TODO: Плейлисты могут выглядеть одинаково, но надо придумать защиту от случайных повторных запросов
+    SQLite::Statement query(_db, "INSERT INTO playlists(name) VALUES (?)");
     query.bind(1, playlist.name);
 
     query.executeStep();
 
     return _db.getLastInsertRowid();
 }
-
-int PlaylistDao::updatePlaylistName(int playlistId, const std::string& newName) {
+bool PlaylistDao::updatePlaylistName(int playlistId, const std::string& newName) {
     SQLite::Statement query(_db, "UPDATE playlists SET name = ? WHERE id = ?");
     query.bind(1, newName);
     query.bind(2, playlistId);
 
     query.executeStep();
 
-    return _db.getChanges();
+    return _db.getChanges() != 0;
 }
-
-void PlaylistDao::deletePlaylist(int playlistId) {
+bool PlaylistDao::deletePlaylist(int playlistId) {
     SQLite::Statement query(_db, "DELETE FROM playlists WHERE id = ?");
     query.bind(1, playlistId);
     query.executeStep();
+
+    return _db.getChanges() != 0;
 }

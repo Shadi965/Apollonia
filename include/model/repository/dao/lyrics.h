@@ -1,9 +1,14 @@
+#pragma once
+
 #ifndef LYRICS_DAO_H
 #define LYRICS_DAO_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <vector>
-#include <stdexcept>
+
+#include "repository_exceptions.h"
+#include "entities.h"
+
 
 // CREATE TABLE IF NOT EXISTS lyrics (
 //     song_id INTEGER NOT NULL, 
@@ -11,21 +16,16 @@
 //     line TEXT NOT NULL, 
 //     FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);
 //
-// CREATE INDEX idx_lyrics_song_time ON lyrics(song_id, time_ms);
+// CREATE INDEX IF NOT EXISTS idx_lyrics_song_time ON lyrics(song_id, time_ms);
 
-struct LyricLine {
-    int songId;
-    int timeMs;
-    std::string line;
-};
 
 class LyricsDao {
 public:
-    LyricsDao(SQLite::Database& db) : _db(db) {}
+    LyricsDao(SQLite::Database& db);
 
-    void addLyricLine(int songId, int timeMs, const std::string& line);
+    std::vector<LyricLineEntity> getLyricsForSong(int songId) const;
 
-    std::vector<LyricLine> getLyricsForSong(int songId);
+    bool addLyricLine(int songId, int timeMs, const std::string& line);
 
 private:
     SQLite::Database& _db;

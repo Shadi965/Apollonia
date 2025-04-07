@@ -1,34 +1,31 @@
+#pragma once
+
 #ifndef DB_MANAGER_H
 #define DB_MANAGER_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
 
 class DatabaseManager {
+public:
+    DatabaseManager(const std::string& dbPath);
+
+    SQLite::Database& getDb();
+
 private:
-    SQLite::Database db;
+    SQLite::Database _db;
 
-    void createSongInfo();
 
-    void createSongMeta();
-
-    void createAlbums();
-
-    void createPlaylists();
-
+    void createSongs();
+    void createSongsMeta();
+    void createAlbums(const std::string& tableName);
+    void createPlaylists(const std::string& tableName);
     void createLyrics();
-
     void createPlaylistSongs();
 
     void initDB();
+    int checkVersion();
 
-public:
-    DatabaseManager(const std::string& dbPath) : db(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
-        initDB();
-    }
-
-    SQLite::Database& getDb() {
-        return db;
-    }
+    void from_v1_to_v2();
 };
 
 

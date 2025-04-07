@@ -1,9 +1,14 @@
+#pragma once
+
 #ifndef PLAYLIST_SONG_DAO_H
 #define PLAYLIST_SONG_DAO_H
 
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <vector>
-#include <stdexcept>
+
+#include "repository_exceptions.h"
+#include "entities.h"
+
 
 // CREATE TABLE IF NOT EXISTS playlist_songs (
 //     playlist_id INTEGER NOT NULL, 
@@ -12,20 +17,15 @@
 //     FOREIGN KEY(playlist_id) REFERENCES playlists(id) ON DELETE CASCADE, 
 //     FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);
 
-struct PlaylistSong {
-    int playlistId;
-    int songId;
-};
 
 class PlaylistSongDao {
 public:
-    PlaylistSongDao(SQLite::Database& db) : _db(db) {}
+    PlaylistSongDao(SQLite::Database& db);
 
-    void addSongToPlaylist(int playlistId, int songId);
+    std::vector<int> getSongsInPlaylist(int playlistId) const;
 
-    void removeSongFromPlaylist(int playlistId, int songId);
-
-    std::vector<int> getSongsInPlaylist(int playlistId);
+    bool addSongToPlaylist(int playlistId, int songId);
+    bool removeSongFromPlaylist(int playlistId, int songId);
 
 private:
     SQLite::Database& _db;

@@ -1,19 +1,12 @@
 #include "songs_meta.h"
 
-// CREATE TABLE IF NOT EXISTS songs_meta (
-//     song_id INTEGER, 
-//     duration INTEGER, 
-//     bitrate INTEGER, 
-//     channels INTEGER, 
-//     sample_rate INTEGER, 
-//     last_modified INTEGER NOT NULL, 
-//     file TEXT UNIQUE, 
-//     FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE);
+SongMetaDao::SongMetaDao(SQLite::Database& db): _db(db) {};
 
-std::vector<SongMeta> SongMetaDao::getAllSongsData() {
-    std::vector<SongMeta> songsMeta;
+std::vector<SongMetaEntity> SongMetaDao::getAllSongsData() const {
+    std::vector<SongMetaEntity> songsMeta;
     SQLite::Statement query(_db, "SELECT * FROM songs_meta");
 
+    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         songsMeta.push_back({
             query.getColumn(0).getInt(),
@@ -28,15 +21,12 @@ std::vector<SongMeta> SongMetaDao::getAllSongsData() {
 
     return songsMeta;
 }
-
-SongMeta SongMetaDao::getSongDataById(int songId) {
-    SQLite::Statement query(_db, "SELECT song_id, duration, bitrate, channels, sample_rate, last_modified, file "
-                                "FROM songs_meta WHERE song_id = ?");
+SongMetaEntity SongMetaDao::getSongDataById(int songId) const {
+    SQLite::Statement query(_db, "SELECT * FROM songs_meta WHERE song_id = ?");
     query.bind(1, songId);
 
-    // TODO: Реализовать нормальные исключения
     if (!query.executeStep()) 
-        throw std::runtime_error("No song metadata found with id: " + std::to_string(songId));
+        throw SongNotFoundException(songId);
 
     return {
         query.getColumn(0).getInt(),
@@ -48,45 +38,41 @@ SongMeta SongMetaDao::getSongDataById(int songId) {
         query.getColumn(6).getString()
     };
 }
-
-int SongMetaDao::getSongDuration(int songId) {
+int SongMetaDao::getSongDuration(int songId) const {
     SQLite::Statement query(_db, "SELECT duration FROM songs_meta WHERE song_id = ?");
     query.bind(1, songId);
 
-    // TODO: Реализовать нормальные исключения
     if (!query.executeStep()) 
-        throw std::runtime_error("No song metadata found with id: " + std::to_string(songId));
+        throw SongNotFoundException(songId);
 
     return query.getColumn(0).getInt();
 }
+std::string SongMetaDao::getFilePathBySongId(int songId) const {
+    SQLite::Statement query(_db, "SELECT file FROM songs_meta WHERE song_id = ?");
+    query.bind(1, songId);
+    
+    if (!query.executeStep())
+        throw SongNotFoundException(songId);
+    
+    return query.getColumn(0).getString();
+}
 
 
-int64_t SongMetaDao::insertSongData(const SongMeta& meta) {
+bool SongMetaDao::insertSongData(const SongMetaEntity& meta) {
     // TODO: Возможна ошибка из-за передачи несуществующего song_id
     SQLite::Statement query(_db, 
         "INSERT INTO songs_meta (song_id, duration, bitrate, channels, sample_rate, last_modified, file) "
         "VALUES (?, ?, ?, ?, ?, ?, ?);"
     );
-    query.bind(1, meta.songId);
+    query.bind(1, meta.song_id);
     query.bind(2, meta.duration);
     query.bind(3, meta.bitrate);
     query.bind(4, meta.channels);
-    query.bind(5, meta.sampleRate);
-    query.bind(6, meta.lastModified);
+    query.bind(5, meta.sample_rate);
+    query.bind(6, meta.last_modified);
     query.bind(7, meta.file);
 
     query.executeStep();
 
-    return _db.getLastInsertRowid();
-}
-
-std::string SongMetaDao::getFilePathBySongId(int songId) {
-    SQLite::Statement query(_db, "SELECT file FROM songs_meta WHERE song_id = ?");
-    query.bind(1, songId);
-    
-    // TODO: Реализовать нормальные исключения
-    if (!query.executeStep())
-        throw std::runtime_error("File path not found for song_id: " + std::to_string(songId));
-    
-    return query.getColumn(0).getString();
+    return _db.getChanges() != 0;
 }
