@@ -6,7 +6,6 @@ std::vector<SongMetaEntity> SongMetaDao::getAllSongsData() const {
     std::vector<SongMetaEntity> songsMeta;
     SQLite::Statement query(_db, "SELECT * FROM songs_meta");
 
-    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         songsMeta.push_back({
             query.getColumn(0).getInt(),

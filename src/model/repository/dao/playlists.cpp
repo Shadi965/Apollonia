@@ -6,7 +6,6 @@ std::vector<PlaylistEntity> PlaylistDao::getAllPlaylists() const {
     std::vector<PlaylistEntity> playlists;
     SQLite::Statement query(_db, "SELECT * FROM playlists");
 
-    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         playlists.push_back({
             query.getColumn(0).getInt(),

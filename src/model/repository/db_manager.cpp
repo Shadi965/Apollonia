@@ -1,6 +1,7 @@
 #include "db_manager.h"
 
 DatabaseManager::DatabaseManager(const std::string& dbPath) : _db(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
+    _db.exec("PRAGMA foreign_keys = ON;");
     switch (checkVersion())
     {
     case 0:
@@ -92,7 +93,6 @@ void DatabaseManager::createPlaylistSongs() {
 }
 
 void DatabaseManager::initDB() {
-    _db.exec("PRAGMA foreign_keys = ON;");
     _db.exec("PRAGMA journal_mode = WAL;");
 
     createAlbums();

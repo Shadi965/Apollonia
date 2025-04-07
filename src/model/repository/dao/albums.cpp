@@ -6,7 +6,6 @@ std::vector<AlbumEntity> AlbumDao::getAllAlbums() const {
     std::vector<AlbumEntity> albums;
     SQLite::Statement query(_db, "SELECT * FROM albums");
 
-    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         albums.push_back({
             query.getColumn(0).getInt(),
@@ -58,7 +57,6 @@ std::vector<int> AlbumDao::getAllAlbumsIds() const {
 
     SQLite::Statement query(_db, "SELECT id FROM albums");
 
-    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep())
         ids.push_back(query.getColumn(0).getInt());
 

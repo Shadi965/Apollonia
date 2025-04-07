@@ -7,7 +7,6 @@ std::vector<LyricLineEntity> LyricsDao::getLyricsForSong(int songId) const {
     SQLite::Statement query(_db, "SELECT time_ms, line FROM lyrics WHERE song_id = ? ORDER BY time_ms ASC");
     query.bind(1, songId);
 
-    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         lyrics.push_back({
             songId,

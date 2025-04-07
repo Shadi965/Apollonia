@@ -6,33 +6,42 @@
 #include <stdexcept>
 #include <string>
 
+
+
+class SongNotFoundException : public std::runtime_error {
+public:
+    const int songId;
+    SongNotFoundException(const int id)
+        : std::runtime_error("Song with ID " + std::to_string(id) + " not found."), songId(id) {}
+};
+    
+
 // class NoSongsException : public std::runtime_error {
 // public:
 //     NoSongsException() : std::runtime_error("No songs available in the database.") {}
 // };
 
-class SongNotFoundException : public std::runtime_error {
-public:
-    const int songId;
-
-    SongNotFoundException(const int id)
-        : std::runtime_error("Song with ID " + std::to_string(id) + " not found."), songId(id) {}
-};
-
-
-
-// class NoAlbumsException : public std::runtime_error {
+// class LyricsNotFoundException : public std::runtime_error {
 // public:
-//     NoAlbumsException() : std::runtime_error("No albums found in the database.") {}
+//     const int songId;
+//     LyricsNotFoundException(const int id)
+//         : std::runtime_error("No lyrics found for song with ID " + std::to_string(id) + "."), songId(id) {}
 // };
+    
+
 
 class AlbumNotFoundException : public std::runtime_error {
 public:
     const int albumId;
-
     AlbumNotFoundException(const int id)
         : std::runtime_error("Album with ID " + std::to_string(id) + " not found."), albumId(id) {}
 };
+    
+
+// class NoAlbumsException : public std::runtime_error {
+// public:
+//     NoAlbumsException() : std::runtime_error("No albums available in the database.") {}
+// };
 
 // class AlbumAlreadyExistsException : public std::runtime_error {
 // public:
@@ -42,19 +51,27 @@ public:
 
 
 
+class PlaylistNotFoundException : public std::runtime_error {
+public:
+    const int playlistId;
+    PlaylistNotFoundException(int id)
+        : std::runtime_error("Playlist with ID " + std::to_string(id) + " not found."), playlistId(id) {}
+};
+    
+
 // class NoPlaylistsException : public std::runtime_error {
 // public:
 //     NoPlaylistsException() 
 //         : std::runtime_error("No playlists available in the database.") {}
 // };
 
-class PlaylistNotFoundException : public std::runtime_error {
-public:
-    const int playlistId;
-
-    PlaylistNotFoundException(int id)
-        : std::runtime_error("Playlist with ID " + std::to_string(id) + " not found."), playlistId(id) {}
-};
+// class NoSongsInPlaylistException : public std::runtime_error {
+// public:
+//     const int playlistId;
+//     NoSongsInPlaylistException(int id) 
+//         : std::runtime_error("There are no songs in the playlist with ID " + std::to_string(id) + "."), playlistId(id) {}
+// };
+    
 
 // class PlaylistUpdateException : public std::runtime_error {
 // public:

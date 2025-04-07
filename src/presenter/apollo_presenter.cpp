@@ -23,7 +23,7 @@ const Lyrics ApolloPresenter::getSongLyrics(int songId) const {
     std::vector<LyricLineEntity> lyrics = _sr.getSongLyricsById(songId);
 
     Lyrics lrc;
-    lrc.songId = lyrics[0].song_id;
+    lrc.songId = songId;
     lrc.lrc.reserve(lyrics.size());
 
     for (auto &&line : lyrics)

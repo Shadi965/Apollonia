@@ -23,8 +23,10 @@ public:
     void regPlaylistRoutes(IPlaylistPresenter& pp);
 
 private:
-    static crow::response statusResponse(int code, std::string status, std::string message);
-    static crow::response statusResponse(int code, std::string status);
+    static crow::response statusResponse(int code, const std::string& status, const std::string& message);
+    static crow::response statusResponse(int code, const std::string& status, const crow::json::wvalue& json, const std::string& key);
+    static crow::response statusResponse(int code, const std::string& status);
+
 
     static crow::json::wvalue songsJson(const std::vector<Song>& songs);
     static crow::json::wvalue songsJson(const Song& song);
@@ -37,7 +39,8 @@ private:
     static crow::json::wvalue playlistsJson(const Playlist& playlist);
     static crow::json::wvalue playlistsJson(const std::vector<Playlist>& playlists);
 
-    static std::string parseName(const crow::request& req);
+    static std::string parseStrKey(const crow::request& req, const std::string& key);
+    static int parseIdKey(const crow::request& req, const std::string& key);
 };
 
 #endif // ROUTES_H

@@ -7,7 +7,6 @@ std::vector<int> PlaylistSongDao::getSongsInPlaylist(int playlistId) const {
     SQLite::Statement query(_db, "SELECT song_id FROM playlist_songs WHERE playlist_id = ?");
     query.bind(1, playlistId);
 
-    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         songIds.push_back(query.getColumn(0).getInt());
     }

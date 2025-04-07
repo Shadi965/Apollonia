@@ -6,7 +6,6 @@ std::vector<SongEntity> SongDao::getAllSongs() const {
     std::vector<SongEntity> songs;
     SQLite::Statement query(_db, "SELECT * FROM songs");
 
-    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         songs.push_back({
             query.getColumn(0).getInt(),
@@ -103,7 +102,6 @@ std::vector<SongEntity> SongDao::getTitleArtistAlbumTuples() const {
 
     SongEntity song;
 
-    // TODO: Нужно проверить нашлось ли что-нибудь
     while (query.executeStep()) {
         song.id = query.getColumn(0).getInt();
         song.title = query.getColumn(1).getString();
