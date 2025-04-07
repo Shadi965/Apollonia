@@ -1,28 +1,26 @@
 #define CROW_MAIN
 
-#include <iostream>
-
-#include "db_manager.h"
-#include "file_service.h"
-#include "song_repository.h"
-#include "song_presenter.h"
 #include "routes.h"
+#include "apollo_presenter.h"
+#include "apollo_repository.h"
+#include "db_manager.h"
 
 #define PORT 8080
 #define DB_PATH "./songs.db"
 
 int main() {
     DatabaseManager dbManager(DB_PATH);
-    SongRepository songRepository(dbManager.getDb());
+    ApolloRepository repository(dbManager.getDb());
 
-    FileService fileService;
+    ApolloPresenter presenter(repository, repository, repository);
 
-    SongPresenter presenter(songRepository, fileService);
+    RoutesManager routesManager(PORT);
 
-    RoutesManager routesManager(PORT, presenter);
+    routesManager.regSongRoutes(presenter);
+    routesManager.regAlbumRoutes(presenter);
+    routesManager.regPlaylistRoutes(presenter);
 
-    // songRepository.initDB("/mnt/c/Users/Shadi/Music/Apple Music/Media/Music", 
-    //                         "/mnt/c/Users/Shadi/Downloads/Lyrics/json");
-    // std::cout << "База данных наполнена" << std::endl;
+    routesManager.runApp();
+
     return 0;
 }

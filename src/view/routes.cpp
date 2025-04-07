@@ -14,17 +14,16 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
     });
     
     CROW_ROUTE(app, "/song/<int>")([&sp](int id) {
-        crow::response res;
         try {
-            res.body = songsJson(sp.getSong(id)).dump();
-            res.code = 200;
-            return res;
+            return crow::response(200, songsJson(sp.getSong(id)));
         }
         catch(const SongNotFoundException& e) {
-            return crow::response(404, crow::json::wvalue{
-                {"error", e.what()}
-            });
+            return statusResponse(404, "error", e.what());
         }
+    });
+
+    CROW_ROUTE(app, "/lyrics/<int>")([&sp](int id) {
+        return lyricsJson(sp.getSongLyrics(id));
     });
 
     // CROW_ROUTE(app, "/stream/<int>")([&sp](const crow::request& req, int id) {
@@ -34,10 +33,6 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
     // CROW_ROUTE(app, "/download/<int>")([&sp](int id) {
     //     return sp.downloadSong(id);
     // });
-
-    CROW_ROUTE(app, "/lyrics/<int>")([&sp](int id) {
-        return lyricsJson(sp.getSongLyrics(id));
-    });
 }
 
 void RoutesManager::regAlbumRoutes(const IAlbumPresenter& ap) {
@@ -46,16 +41,11 @@ void RoutesManager::regAlbumRoutes(const IAlbumPresenter& ap) {
     });
 
     CROW_ROUTE(app, "/album/<int>")([&ap](int id){
-        crow::response res;
         try {
-            res.body = albumsJson(ap.getAlbum(id)).dump();
-            res.code = 200;
-            return res;
+            return crow::response(200, albumsJson(ap.getAlbum(id)));
         }
         catch(const AlbumNotFoundException& e) {
-            return crow::response(404, crow::json::wvalue{
-                {"error", e.what()}
-            });
+            return statusResponse(404, "error", e.what());
         }
     });
 }
@@ -66,25 +56,20 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     });
 
     CROW_ROUTE(app, "/playlist/<int>")([&pp](int id){
-        crow::response res;
         try {
-            res.body = playlistsJson(pp.getPlaylist(id)).dump();
-            res.code = 200;
-            return res;
+            return crow::response(200, playlistsJson(pp.getPlaylist(id)));
         }
         catch(const PlaylistNotFoundException& e) {
-            return crow::response(404, crow::json::wvalue{
-                {"error", e.what()}
-            });
+            return statusResponse(404, "error", e.what());
         }
     });
 
-    CROW_ROUTE(app, "/playlist/new").methods(crow::HTTPMethod::POST)
-    ([&pp](const crow::request& req){            
+    CROW_ROUTE(app, "/playlist/").methods(crow::HTTPMethod::POST)
+    ([&pp](const crow::request& req){ 
         std::string name = parseName(req);
 
         if (name.empty())
-            return errorResponse(400, "fail", "Missing 'name' in request");
+            return statusResponse(400, "fail", "Missing 'name' in request");
         
         int newId = pp.createPlaylist(name);
 
@@ -94,15 +79,15 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
         return crow::response(201, result);
     });
 
-    CROW_ROUTE(app, "/playlist/update/<int>").methods(crow::HTTPMethod::PATCH)
+    CROW_ROUTE(app, "/playlist/<int>").methods(crow::HTTPMethod::PATCH)
     ([&pp](const crow::request& req, int id){
         std::string newName = parseName(req);
         
         if (newName.empty())
-            return errorResponse(400, "fail", "Missing 'name' in request");
+            return statusResponse(400, "fail", "Missing 'name' in request");
         
         if (!pp.renamePlaylist(id, newName))
-            return errorResponse(404, "fail", "Playlist not found");
+            return statusResponse(404, "fail", "Playlist not found");
 
         crow::json::wvalue result;
         result["status"] = "success";
@@ -110,31 +95,24 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
         return crow::response(200, result);
     });
 
-    // CROW_ROUTE(app, "/playlist/add/<int>/<int>")([&songPresenter](int id, int songId){
-    //     songPresenter.addSongToPlaylist(id, songId);
-    //     return "Ok";
-    // });
-
-    // CROW_ROUTE(app, "/playlist/remove/<int>/<int>")([&songPresenter](int id, int songId){
-    //     songPresenter.removeSongFromPlaylist(id, songId);
-    //     return "Ok";
-    // });
-
-    // CROW_ROUTE(app, "/playlist/delete/<int>")([&songPresenter](int id){
-    //     songPresenter.deletePlaylist(id);
-    //     return "Ok";
-    // });
+    CROW_ROUTE(app, "/playlist/<int>").methods(crow::HTTPMethod::DELETE)
+    ([&pp](int id) {
+        if (pp.deletePlaylist(id))
+            return statusResponse(200, "success", "Playlist deleted successfully");
+         else
+            return statusResponse(404, "fail", "Nothing was deleted");
+    });
 }
 
 
-crow::response RoutesManager::errorResponse(int code, std::string status, std::string message) {
+crow::response RoutesManager::statusResponse(int code, std::string status, std::string message) {
     crow::json::wvalue result;
     result["status"] = status;
     result["message"] = message;
 
     return crow::response(code, result);
 }
-crow::response RoutesManager::errorResponse(int code, std::string status) {
+crow::response RoutesManager::statusResponse(int code, std::string status) {
     crow::json::wvalue result;
     result["status"] = status;
 
@@ -164,7 +142,7 @@ crow::json::wvalue RoutesManager::songsJson(const std::vector<Song>& songs) {
     return json;
 }
 crow::json::wvalue RoutesManager::songsJson(const Song& song) {
-    return songsJson({song});
+    return songsJson(std::vector<Song>{song});
 }
 
 crow::json::wvalue RoutesManager::lyricsJson(const Lyrics& lyrics) {
@@ -196,7 +174,7 @@ crow::json::wvalue RoutesManager::albumsJson(const std::vector<Album>& albums) {
     return json;
 }
 crow::json::wvalue RoutesManager::albumsJson(const Album album) {
-    return albumsJson({album});
+    return albumsJson(std::vector<Album>{album});
 }
 
 crow::json::wvalue RoutesManager::playlistsJson(const Playlist& playlist) {

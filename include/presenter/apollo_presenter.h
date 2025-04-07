@@ -13,10 +13,10 @@
 
 
 
-class Presenter : public ISongPresenter, public IAlbumPresenter, public IPlaylistPresenter {
+class ApolloPresenter : public ISongPresenter, public IAlbumPresenter, public IPlaylistPresenter {
 public:
-    Presenter(ISongRepository& sr, IAlbumRepository& ar, IPlaylistRepository& pr);
-    ~Presenter();
+    ApolloPresenter(ISongRepository& sr, IAlbumRepository& ar, IPlaylistRepository& pr);
+    ~ApolloPresenter();
 
     const std::vector<Song> getAllSongs() const override;
     const Song getSong(int id) const override;

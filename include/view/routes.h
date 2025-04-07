@@ -1,76 +1,43 @@
+#pragma once
+
 #ifndef ROUTES_H
 #define ROUTES_H
 
 #include <crow.h>
 
-#include "song_presenter.h"
+#include "repository_exceptions.h"
+#include "interfaces/song_presenter.h"
+#include "interfaces/album_presenter.h"
+#include "interfaces/playlist_presenter.h"
 
 class RoutesManager {
 private:
     crow::SimpleApp app;
 
 public:
-    RoutesManager(uint16_t port, SongPresenter& songPresenter) {
-        CROW_ROUTE(app, "/songs")([&songPresenter]() {
-            return songPresenter.allSongsInfo();
-        });
-        
-        CROW_ROUTE(app, "/song/<int>")([&songPresenter](int id) {
-            return songPresenter.songInfo(id);
-        });
+    RoutesManager(uint16_t port);
+    void runApp();
 
-        CROW_ROUTE(app, "/stream/<int>")([&songPresenter](const crow::request& req, int id){
-            return songPresenter.streamSong(id, req);
-        });
+    void regSongRoutes(const ISongPresenter& sp);
+    void regAlbumRoutes(const IAlbumPresenter& ap);
+    void regPlaylistRoutes(IPlaylistPresenter& pp);
 
-        CROW_ROUTE(app, "/download/<int>")([&songPresenter](int id){
-            return songPresenter.downloadSong(id);
-        });
+private:
+    static crow::response statusResponse(int code, std::string status, std::string message);
+    static crow::response statusResponse(int code, std::string status);
 
-        CROW_ROUTE(app, "/lyrics/<int>")([&songPresenter](int id){
-            return songPresenter.songLyric(id);
-        });
+    static crow::json::wvalue songsJson(const std::vector<Song>& songs);
+    static crow::json::wvalue songsJson(const Song& song);
 
-        CROW_ROUTE(app, "/meta/")([&songPresenter](){
-            return songPresenter.songsMeta();
-        });
+    static crow::json::wvalue lyricsJson(const Lyrics& lyrics);
 
-        CROW_ROUTE(app, "/playlists/")([&songPresenter](){
-            return songPresenter.allPlaylists();
-        });
+    static crow::json::wvalue albumsJson(const std::vector<Album>& albums);
+    static crow::json::wvalue albumsJson(const Album album);
 
-        CROW_ROUTE(app, "/playlist/<int>")([&songPresenter](int id){
-            return songPresenter.getAllSongsFromPlaylist(id);
-        });
+    static crow::json::wvalue playlistsJson(const Playlist& playlist);
+    static crow::json::wvalue playlistsJson(const std::vector<Playlist>& playlists);
 
-        CROW_ROUTE(app, "/playlist/new/<string>")([&songPresenter](std::string name){
-            songPresenter.createPlaylist(name);
-            return "Ok";
-        });
-
-        CROW_ROUTE(app, "/playlist/update/<int>/<string>")([&songPresenter](int id, std::string newName){
-            songPresenter.changePlaylistName(id, newName);
-            return "Ok";
-        });
-
-        CROW_ROUTE(app, "/playlist/add/<int>/<int>")([&songPresenter](int id, int songId){
-            songPresenter.addSongToPlaylist(id, songId);
-            return "Ok";
-        });
-
-        CROW_ROUTE(app, "/playlist/remove/<int>/<int>")([&songPresenter](int id, int songId){
-            songPresenter.removeSongFromPlaylist(id, songId);
-            return "Ok";
-        });
-
-        CROW_ROUTE(app, "/playlist/delete/<int>")([&songPresenter](int id){
-            songPresenter.deletePlaylist(id);
-            return "Ok";
-        });
-
-        app.port(port).multithreaded().run();
-    }
+    static std::string parseName(const crow::request& req);
 };
-
 
 #endif // ROUTES_H
