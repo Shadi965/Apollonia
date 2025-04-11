@@ -40,7 +40,7 @@ private:
     static crow::json::wvalue playlistsJson(const std::vector<Playlist>& playlists);
 
     static std::string parseStrKey(const crow::request& req, const std::string& key);
-    static int parseIdKey(const crow::request& req, const std::string& key);
+    static int parseIntKey(const crow::request& req, const std::string& key);
 };
 
 #endif // ROUTES_H

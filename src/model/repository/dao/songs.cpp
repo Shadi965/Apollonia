@@ -49,7 +49,7 @@ SongEntity SongDao::getSongById(int songId) const {
 }
 
 int SongDao::insertSong(const SongEntity& song) {
-    // TODO: Нужна доработать базу и задать уникальную связь (например для title, artist и album_id)
+    // TODO: Нужно доработать базу и задать уникальную связь (например для title, artist и album_id)
     SQLite::Statement query(_db, 
         "INSERT INTO songs (title, artist, composer, album_id, track, disc, date, copyright, genre) "
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");

@@ -16,12 +16,12 @@ std::vector<PlaylistEntity> PlaylistDao::getAllPlaylists() const {
 
     return playlists;
 }
-PlaylistEntity PlaylistDao::getPlaylistById(int playlistId) const {
+PlaylistEntity PlaylistDao::getPlaylistById(int id) const {
     SQLite::Statement query(_db, "SELECT * FROM playlists WHERE id = ?");
-    query.bind(1, playlistId);
+    query.bind(1, id);
 
     if (!query.executeStep()) 
-        throw PlaylistNotFoundException(playlistId);
+        throw PlaylistNotFoundException(id);
 
     return {
         query.getColumn(0).getInt(),
@@ -39,18 +39,18 @@ int PlaylistDao::insertPlaylist(const PlaylistEntity& playlist) {
 
     return _db.getLastInsertRowid();
 }
-bool PlaylistDao::updatePlaylistName(int playlistId, const std::string& newName) {
+bool PlaylistDao::updatePlaylistName(int id, const std::string& newName) {
     SQLite::Statement query(_db, "UPDATE playlists SET name = ? WHERE id = ?");
     query.bind(1, newName);
-    query.bind(2, playlistId);
+    query.bind(2, id);
 
     query.executeStep();
 
     return _db.getChanges() != 0;
 }
-bool PlaylistDao::deletePlaylist(int playlistId) {
+bool PlaylistDao::deletePlaylist(int id) {
     SQLite::Statement query(_db, "DELETE FROM playlists WHERE id = ?");
-    query.bind(1, playlistId);
+    query.bind(1, id);
     query.executeStep();
 
     return _db.getChanges() != 0;

@@ -21,11 +21,11 @@ public:
     PlaylistDao(SQLite::Database& db);
 
     std::vector<PlaylistEntity> getAllPlaylists() const;
-    PlaylistEntity getPlaylistById(int playlistId) const;
+    PlaylistEntity getPlaylistById(int id) const;
 
     int insertPlaylist(const PlaylistEntity& playlist);
-    bool updatePlaylistName(int playlistId, const std::string& newName);
-    bool deletePlaylist(int playlistId);
+    bool updatePlaylistName(int id, const std::string& newName);
+    bool deletePlaylist(int id);
 
 private:
     SQLite::Database& _db;
