@@ -28,6 +28,7 @@ public:
     virtual bool removeSongFromPlaylist(int playlistId, int songId) = 0;
 
     // virtual img dloadPlaylistCover(int id) = 0;
+    virtual bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size) = 0;
 };
 
 #endif // I_PLAYLIST_PRESENTER_H

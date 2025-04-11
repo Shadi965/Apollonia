@@ -27,6 +27,8 @@ public:
     bool updatePlaylistName(int id, const std::string& newName);
     bool deletePlaylist(int id);
 
+    bool updatePlaylistCoverPath(int id, const std::string& coverPath);
+
 private:
     SQLite::Database& _db;
 };

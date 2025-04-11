@@ -6,6 +6,7 @@
 #include "interfaces/song_presenter.h"
 #include "interfaces/album_presenter.h"
 #include "interfaces/playlist_presenter.h"
+#include "interfaces/file_service.h"
 
 #include "interfaces/song_repository.h"
 #include "interfaces/album_repository.h"
@@ -15,7 +16,8 @@
 
 class ApolloPresenter : public ISongPresenter, public IAlbumPresenter, public IPlaylistPresenter {
 public:
-    ApolloPresenter(ISongRepository& sr, IAlbumRepository& ar, IPlaylistRepository& pr);
+    ApolloPresenter(ISongRepository& sr, IAlbumRepository& ar, IPlaylistRepository& pr,
+                    IFileService& fs);
     ~ApolloPresenter();
 
     const std::vector<Song> getAllSongs() const override;
@@ -46,12 +48,13 @@ public:
     bool removeSongFromPlaylist(int playlistId, int songId) override;
 
     // virtual img dloadPlaylistCover(int id) = 0;
-
+    bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size) override;
 
 private:
     ISongRepository& _sr;
     IAlbumRepository& _ar;
     IPlaylistRepository& _pr;
+    IFileService& _fs;
 
     static Song toSong(const SongEntity& se, const SongMetaEntity& sme);
     static Album toAlbum(const AlbumEntity& ae);

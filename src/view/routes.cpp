@@ -106,8 +106,8 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     CROW_ROUTE(app, "/playlist/song/").methods(crow::HTTPMethod::POST)
     ([&pp](const crow::request& req) {
         if (req.get_header_value("Content-Type") == "application/json") {
-            int playlistId = parseIdKey(req, "playlist_id");
-            int songId = parseIdKey(req, "song_id");
+            int playlistId = parseIntKey(req, "playlist_id");
+            int songId = parseIntKey(req, "song_id");
             if (playlistId != 0 && songId != 0 && pp.addSongToPlaylist(playlistId, songId)) {
                 return statusResponse(200, "success");
             }
@@ -118,11 +118,20 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     CROW_ROUTE(app, "/playlist/song/").methods(crow::HTTPMethod::DELETE)
     ([&pp](const crow::request& req) {
         if (req.get_header_value("Content-Type") == "application/json") {
-            int playlistId = parseIdKey(req, "playlist_id");
-            int songId = parseIdKey(req, "song_id");
+            int playlistId = parseIntKey(req, "playlist_id");
+            int songId = parseIntKey(req, "song_id");
             if (playlistId != 0 && songId != 0 && pp.removeSongFromPlaylist(playlistId, songId)) {
                 return statusResponse(200, "success");
             }
+        }
+        return statusResponse(404, "fail");
+    });
+
+    CROW_ROUTE(app, "/playlist/cover/<int>").methods(crow::HTTPMethod::PUT)
+    ([&pp](const crow::request& req, int id) {
+        if (req.get_header_value("Content-Type") == "application/octet-stream") {
+            if (pp.uploadPlaylistCover(id, req.body.data(), req.body.size()))
+                return statusResponse(200, "success");
         }
         return statusResponse(404, "fail");
     });
@@ -245,7 +254,7 @@ std::string RoutesManager::parseStrKey(const crow::request& req, const std::stri
     }
 }
 
-int RoutesManager::parseIdKey(const crow::request& req, const std::string& key) {
+int RoutesManager::parseIntKey(const crow::request& req, const std::string& key) {
     auto body = crow::json::load(req.body);
     if (!body.has(key)) {
         return 0;

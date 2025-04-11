@@ -23,6 +23,7 @@ public:
     virtual bool addSongToPlaylist(int playlistId, int songId) = 0;
     virtual bool removeSongFromPlaylist(int playlistId, int songId) = 0;
     
+    virtual bool updatePlaylistCoverPath(int id, const std::string& coverPath) = 0;
 };
 
 #endif // I_PLAYLIST_REPOSITORY_H

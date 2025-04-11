@@ -55,3 +55,13 @@ bool PlaylistDao::deletePlaylist(int id) {
 
     return _db.getChanges() != 0;
 }
+
+bool PlaylistDao::updatePlaylistCoverPath(int id, const std::string& coverPath) {
+    SQLite::Statement query(_db, "UPDATE playlists SET cover_path = ? WHERE id = ?");
+    query.bind(1, coverPath);
+    query.bind(2, id);
+
+    query.executeStep();
+
+    return _db.getChanges() != 0;
+}

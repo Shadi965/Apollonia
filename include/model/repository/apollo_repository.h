@@ -45,6 +45,8 @@ public:
     bool addSongToPlaylist(int playlistId, int songId);
     bool removeSongFromPlaylist(int playlistId, int songId);
 
+    bool updatePlaylistCoverPath(int id, const std::string& coverPath) override;
+
 private:
     SongDao _songDao;
     SongMetaDao _songMetaDao;

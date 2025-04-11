@@ -29,6 +29,7 @@ set(DAO_SOURCES ${DAO_PATH}/albums.cpp
 
 set(PROJECT_SOURCES src/model/repository/db_manager.cpp
                     src/model/repository/apollo_repository.cpp
+                    src/model/file_service.cpp
                     src/presenter/apollo_presenter.cpp
                     src/view/routes.cpp
                     src/main.cpp)

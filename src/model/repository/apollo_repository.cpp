@@ -58,3 +58,7 @@ bool ApolloRepository::addSongToPlaylist(int playlistId, int songId) {
 bool ApolloRepository::removeSongFromPlaylist(int playlistId, int songId) {
     return _playlistSongDao.removeSongFromPlaylist(playlistId, songId);
 }
+
+bool ApolloRepository::updatePlaylistCoverPath(int id, const std::string& coverPath) {
+    return _playlistDao.updatePlaylistCoverPath(id, coverPath);
+}
