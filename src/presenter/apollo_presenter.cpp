@@ -49,6 +49,15 @@ const Album ApolloPresenter::getAlbum(int id) const {
     return toAlbum(_ar.getAlbumById(id));
 }
 
+bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsize size) {
+    std::string name = std::to_string(id) + '_' + _ar.getAlbumById(id).title;
+    std::string path = _fs.saveAlbumCover(name, bytes, size);
+    if (path.empty())
+        return false;
+    
+    return _ar.updateAlbumCoverPath(id, path);
+}
+
 
 
 const std::vector<Playlist> ApolloPresenter::getAllPlaylists() const {
@@ -84,7 +93,7 @@ bool ApolloPresenter::removeSongFromPlaylist(int playlistId, int songId){
 
 bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::streamsize size) {
     std::string name = std::to_string(id) + '_' + _pr.getPlaylistById(id).name;
-    std::string path = _fs.saveBytesToFile(name, bytes, size);
+    std::string path = _fs.savePlaylistCover(name, bytes, size);
     if (path.empty())
         return false;
     

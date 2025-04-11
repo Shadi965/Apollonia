@@ -9,7 +9,8 @@ class IFileService {
 public:
     virtual ~IFileService() = default;
 
-    virtual std::string saveBytesToFile(const std::string& name, const char* bytes, std::streamsize size) = 0;
+    virtual std::string savePlaylistCover(const std::string& name, const char* bytes, std::streamsize size) = 0;
+    virtual std::string saveAlbumCover(const std::string& name, const char* bytes, std::streamsize size) = 0;
     
 };
 

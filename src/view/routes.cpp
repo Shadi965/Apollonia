@@ -35,7 +35,7 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
     });
 }
 
-void RoutesManager::regAlbumRoutes(const IAlbumPresenter& ap) {
+void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
     CROW_ROUTE(app, "/albums/")([&ap](){
         return statusResponse(200, "success", albumsJson(ap.getAllAlbums()), "albums");
     });
@@ -47,6 +47,15 @@ void RoutesManager::regAlbumRoutes(const IAlbumPresenter& ap) {
         catch(const AlbumNotFoundException& e) {
             return statusResponse(404, "fail", e.what());
         }
+    });
+
+    CROW_ROUTE(app, "/album/cover/<int>").methods(crow::HTTPMethod::PUT)
+    ([&ap](const crow::request& req, int id) {
+        if (req.get_header_value("Content-Type") == "application/octet-stream") {
+            if (ap.uploadAlbumCover(id, req.body.data(), req.body.size()))
+                return statusResponse(200, "success");
+        }
+        return statusResponse(404, "fail");
     });
 }
 

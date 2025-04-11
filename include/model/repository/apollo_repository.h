@@ -30,6 +30,9 @@ public:
 
     std::vector<AlbumEntity> getAllAlbums() const override;
     AlbumEntity getAlbumById(int id) const override;
+    
+    bool updateAlbumCoverPath(int id, const std::string& coverPath) override;
+
 
 
 

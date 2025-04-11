@@ -19,7 +19,7 @@ public:
     void runApp();
 
     void regSongRoutes(const ISongPresenter& sp);
-    void regAlbumRoutes(const IAlbumPresenter& ap);
+    void regAlbumRoutes(IAlbumPresenter& ap);
     void regPlaylistRoutes(IPlaylistPresenter& pp);
 
 private:

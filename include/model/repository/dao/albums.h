@@ -37,6 +37,7 @@ public:
 
     int insertAlbum(const AlbumEntity& album);    
     bool updateAlbumDateAndGenre(int albumId, const std::string& newDate, const std::string& newGenre);
+    bool updateAlbumCoverPath(int id, const std::string& coverPath);
 
 private:
     SQLite::Database& _db;

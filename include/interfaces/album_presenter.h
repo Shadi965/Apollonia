@@ -27,6 +27,8 @@ public:
     virtual const Album getAlbum(int id) const = 0;
 
     // virtual img dloadAlbumCover(int id) = 0;
+    virtual bool uploadAlbumCover(int id, const char* bytes, std::streamsize size) = 0;
+
 };
 
 #endif // I_ALBUM_PRESENTER_H

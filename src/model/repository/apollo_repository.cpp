@@ -29,6 +29,10 @@ AlbumEntity ApolloRepository::getAlbumById(int id) const {
     return _albumDao.getAlbumById(id);
 }
 
+bool ApolloRepository::updateAlbumCoverPath(int id, const std::string& coverPath) {
+    return _albumDao.updateAlbumCoverPath(id, coverPath);
+}
+
 
 
 std::vector<PlaylistEntity> ApolloRepository::getAllPlaylists() const {

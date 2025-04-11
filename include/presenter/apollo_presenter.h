@@ -34,6 +34,8 @@ public:
     const Album getAlbum(int id) const override;
 
     // virtual img dloadAlbumCover(int id) = 0;
+    bool uploadAlbumCover(int id, const char* bytes, std::streamsize size) override;
+
 
 
 
