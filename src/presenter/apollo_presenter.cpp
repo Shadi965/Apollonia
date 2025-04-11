@@ -1,5 +1,6 @@
-#include "apollo_presenter.h"
+#include <algorithm>
 
+#include "apollo_presenter.h"
 ApolloPresenter::ApolloPresenter(ISongRepository& sr, IAlbumRepository& ar, IPlaylistRepository& pr,
                                  IFileService& fs) : _sr(sr), _ar(ar), _pr(pr), _fs(fs) {}
 ApolloPresenter::~ApolloPresenter() = default;
@@ -51,6 +52,7 @@ const Album ApolloPresenter::getAlbum(int id) const {
 
 bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsize size) {
     std::string name = std::to_string(id) + '_' + _ar.getAlbumById(id).title;
+    std::replace(name.begin(), name.end(), ' ', '_');
     std::string path = _fs.saveAlbumCover(name, bytes, size);
     if (path.empty())
         return false;
@@ -93,6 +95,7 @@ bool ApolloPresenter::removeSongFromPlaylist(int playlistId, int songId){
 
 bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::streamsize size) {
     std::string name = std::to_string(id) + '_' + _pr.getPlaylistById(id).name;
+    std::replace(name.begin(), name.end(), ' ', '_');
     std::string path = _fs.savePlaylistCover(name, bytes, size);
     if (path.empty())
         return false;
