@@ -17,33 +17,33 @@
 class ApolloRepository : public ISongRepository, public IAlbumRepository, public IPlaylistRepository {
 public:
     ApolloRepository(SQLite::Database& db);
-    ~ApolloRepository();
+    ~ApolloRepository() override;
 
-    std::vector<SongEntity> getAllSongs() const;
-    SongEntity getSongById(int id) const;
+    std::vector<SongEntity> getAllSongs() const override;
+    SongEntity getSongById(int id) const override;
 
-    SongMetaEntity getSongMetaById(int id) const;
+    SongMetaEntity getSongMetaById(int id) const override;
 
-    std::vector<LyricLineEntity> getSongLyricsById(int id) const;
-
-
-
-    std::vector<AlbumEntity> getAllAlbums() const;
-    AlbumEntity getAlbumById(int id) const;
+    std::vector<LyricLineEntity> getSongLyricsById(int id) const override;
 
 
 
-    std::vector<PlaylistEntity> getAllPlaylists() const;
-    PlaylistEntity getPlaylistById(int id) const;
+    std::vector<AlbumEntity> getAllAlbums() const override;
+    AlbumEntity getAlbumById(int id) const override;
 
-    std::vector<int> getPlaylistSongs(int id) const;
 
-    int createPlaylist(const std::string name);
-    bool renamePlaylist(int playlistId, const std::string newName);
-    bool deletePlaylist(int playlistId);
 
-    bool addSongToPlaylist(int playlistId, int songId);
-    bool removeSongFromPlaylist(int playlistId, int songId);
+    std::vector<PlaylistEntity> getAllPlaylists() const override;
+    PlaylistEntity getPlaylistById(int id) const override;
+
+    std::vector<int> getPlaylistSongs(int id) const override;
+
+    int createPlaylist(const std::string name) override;
+    bool renamePlaylist(int playlistId, const std::string newName) override;
+    bool deletePlaylist(int playlistId) override;
+
+    bool addSongToPlaylist(int playlistId, int songId) override;
+    bool removeSongFromPlaylist(int playlistId, int songId) override;
 
     bool updatePlaylistCoverPath(int id, const std::string& coverPath) override;
 

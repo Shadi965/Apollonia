@@ -8,7 +8,7 @@
 class FileService : public IFileService {
 public:
     FileService(std::string coversDir);
-    ~FileService();
+    ~FileService() override;
 
     std::string saveBytesToFile(const std::string& name, const char* bytes, std::streamsize size) override;
 

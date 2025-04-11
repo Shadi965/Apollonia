@@ -18,7 +18,7 @@ class ApolloPresenter : public ISongPresenter, public IAlbumPresenter, public IP
 public:
     ApolloPresenter(ISongRepository& sr, IAlbumRepository& ar, IPlaylistRepository& pr,
                     IFileService& fs);
-    ~ApolloPresenter();
+    ~ApolloPresenter() override;
 
     const std::vector<Song> getAllSongs() const override;
     const Song getSong(int id) const override;
