@@ -311,19 +311,25 @@ int RoutesManager::parseIntKey(const crow::request& req, const std::string& key)
 }
 
 std::string RoutesManager::parseImgFileExt(const crow::request& req) {
-    std::string type = req.get_header_value("Content-Type");
+    static const std::unordered_map<std::string, std::string> imageExts = {
+        {"image/jpeg"   , ".jpeg"},
+        {"image/jfif"   , ".jpeg"},
+        {"image/png"    , ".png"},
+        {"image/gif"    , ".gif"},
+        {"image/bmp"    , ".bmp"},
+        {"image/webp"   , ".webp"},
+        {"image/tiff"   , ".tiff"},
+        {"image/svg+xml", ".svg"},
+        {"image/x-icon" , ".ico"},
+        {"image/heic"   , ".heic"},
+        {"image/heif"   , ".heif"}
+    };
 
-    size_t pos = type.find('/');
-    if (pos == std::string::npos) return "";
+    auto it = imageExts.find(req.get_header_value("Content-Type"));
+    if(it == imageExts.end())
+        return "";
 
-    std::string ext = type.substr(pos + 1);
-    type = type.substr(0, pos);
-    if (type != "image") return "";
-    
-    if (ext == "svg+xml") return "svg";
-    if (ext == "x-icon") return "ico";
-    
-    return ext;
+    return it->second;
 }
 
 std::string RoutesManager::imageTypeByExtension(const std::string& ext) {
