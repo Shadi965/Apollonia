@@ -83,7 +83,30 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
     });
 
     CROW_ROUTE(app, "/download/<int>")([&sp](int id) {
-        return crow::response(501);
+        size_t start = 0;
+        size_t end = std::numeric_limits<size_t>::max();
+    
+        FileChunk chunk = sp.getFileChunk(id, start, end);
+
+        std::string contentType;
+        auto it = mediaTypes.find(chunk.extension);
+        if (it == mediaTypes.end())
+            contentType = "audio/mpeg";
+        else
+            contentType = it->second;
+
+        std::string fileName = sp.getsongFileName(id);
+
+        crow::response res;
+        res.code = 200;
+        res.set_header("Content-Type", contentType);
+        res.set_header("Accept-Ranges", "bytes");
+        res.set_header("Content-Length", std::to_string(chunk.size));
+        res.set_header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+
+    
+        res.body = std::move(chunk.data);
+        return res;
     });
 
 }

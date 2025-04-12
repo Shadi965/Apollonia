@@ -39,7 +39,10 @@ const FileChunk ApolloPresenter::getFileChunk(int id, size_t start, size_t end) 
     Chunk chunk = _fs.getChunk(path, start, end);
     return {chunk.data, chunk.size, chunk.totalSize, chunk.extension};
 }
-
+const std::string ApolloPresenter::getsongFileName(int id) const {
+    std::filesystem::path path = _sr.getSongPathById(id);
+    return path.filename().string();
+}
 
 const std::vector<Album> ApolloPresenter::getAllAlbums() const {
     std::vector<AlbumEntity> albumsEntities = _ar.getAllAlbums();
