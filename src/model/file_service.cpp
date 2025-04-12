@@ -1,13 +1,11 @@
-#include <filesystem>
 #include <fstream>
 
 #include "file_service.h"
 
 FileService::FileService(std::string coversDir) {
-    if (!coversDir.empty() && coversDir.back() == '/')
-        coversDir.pop_back();
-    _pCoversDir = coversDir + "/playlist_cover/";
-    _aCoversDir = coversDir + "/album_cover/";
+    std::filesystem::path dir = coversDir;
+    _pCoversDir = dir / "playlist_cover/";
+    _aCoversDir = dir / "album_cover/";
 
     if (!std::filesystem::exists(_pCoversDir))
         std::filesystem::create_directories(_pCoversDir);
@@ -18,7 +16,7 @@ FileService::~FileService() = default;
 
 
 std::string FileService::savePlaylistCover(const std::string& name, const char* bytes, std::streamsize size) {
-    std::string filePath = _pCoversDir + name;
+    std::filesystem::path filePath = _pCoversDir / name;
 
     std::ofstream outFile(filePath, std::ios::binary | std::ios::trunc);
 
@@ -31,11 +29,11 @@ std::string FileService::savePlaylistCover(const std::string& name, const char* 
         return "";
     
     outFile.close();
-    return filePath;
+    return std::filesystem::absolute(filePath);
 }
 
 std::string FileService::saveAlbumCover(const std::string& name, const char* bytes, std::streamsize size) {
-    std::string filePath = _aCoversDir + name;
+    std::filesystem::path filePath = _aCoversDir / name;
 
     std::ofstream outFile(filePath, std::ios::binary | std::ios::trunc);
 
@@ -48,5 +46,5 @@ std::string FileService::saveAlbumCover(const std::string& name, const char* byt
         return "";
     
     outFile.close();
-    return filePath;
+    return std::filesystem::absolute(filePath);
 }
