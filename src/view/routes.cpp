@@ -72,7 +72,7 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         res.set_header("Content-Type", contentType);
         res.set_header("Accept-Ranges", "bytes");
         res.set_header("Content-Length", std::to_string(chunk.size));
-        // res.set_header("Content-Disposition", "attachment; filename=\"" + chunk.fileName + "\"");
+        res.set_header("Content-Disposition", "inline; filename=\"" + chunk.fileName + "\"");
     
         std::string contentRange = "bytes " + std::to_string(start) + "-" + 
                                               std::to_string(start + chunk.size - 1) + "/" + 
