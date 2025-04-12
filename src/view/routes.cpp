@@ -58,7 +58,7 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         if (!rangeHeader.empty())
             sscanf(rangeHeader.c_str(), "bytes=%zu-%zu", &start, &end);
     
-        FileChunk chunk = sp.getFileChunk(id, start, end);
+        FileData chunk = sp.getFileChunk(id, start, end);
 
         std::string contentType;
         auto it = mediaTypes.find(chunk.extension);
@@ -72,6 +72,7 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         res.set_header("Content-Type", contentType);
         res.set_header("Accept-Ranges", "bytes");
         res.set_header("Content-Length", std::to_string(chunk.size));
+        // res.set_header("Content-Disposition", "attachment; filename=\"" + chunk.fileName + "\"");
     
         std::string contentRange = "bytes " + std::to_string(start) + "-" + 
                                               std::to_string(start + chunk.size - 1) + "/" + 
@@ -86,7 +87,7 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         size_t start = 0;
         size_t end = std::numeric_limits<size_t>::max();
     
-        FileChunk chunk = sp.getFileChunk(id, start, end);
+        FileData chunk = sp.getFileChunk(id, start, end);
 
         std::string contentType;
         auto it = mediaTypes.find(chunk.extension);
@@ -95,14 +96,12 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         else
             contentType = it->second;
 
-        std::string fileName = sp.getsongFileName(id);
-
         crow::response res;
         res.code = 200;
         res.set_header("Content-Type", contentType);
         res.set_header("Accept-Ranges", "bytes");
         res.set_header("Content-Length", std::to_string(chunk.size));
-        res.set_header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        res.set_header("Content-Disposition", "attachment; filename=\"" + chunk.fileName + "\"");
 
     
         res.body = std::move(chunk.data);
@@ -139,14 +138,22 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
 
     CROW_ROUTE(app, "/album/cover/<int>").methods(crow::HTTPMethod::GET)
     ([&ap](int id) {
-        auto [file, ext] = ap.dloadAlbumCover(id);
-        if (file.empty() || ext.empty())
+        FileData data = ap.dloadAlbumCover(id);
+        if (data.data.empty())
             return statusResponse(404, "fail", "Cover not found for this album");
-        std::string type = imageTypeByExtension(ext);
+        std::string type = imageTypeByExtension(data.extension);
         if (type.empty())
             return statusResponse(404, "fail", "Cover not found for this album");        
         
-        return crow::response(200, type, file);
+        crow::response res;
+        res.code = 200;
+        res.set_header("Content-Type", type);
+        res.set_header("Content-Length", std::to_string(data.totalSize));
+        res.set_header("Content-Disposition", "inline; filename=\"" + data.fileName + "\"");
+
+    
+        res.body = std::move(data.data);
+        return res;
     });
 }
 
@@ -241,14 +248,22 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
 
     CROW_ROUTE(app, "/playlist/cover/<int>").methods(crow::HTTPMethod::GET)
     ([&pp](int id) {
-        auto [file, ext] = pp.dloadPlaylistCover(id);
-        if (file.empty() || ext.empty())
+        FileData data = pp.dloadPlaylistCover(id);
+        if (data.data.empty())
             return statusResponse(404, "fail", "Cover not found for this playlist");
-        std::string type = imageTypeByExtension(ext);
+        std::string type = imageTypeByExtension(data.extension);
         if (type.empty())
             return statusResponse(404, "fail", "Cover not found for this playlist");        
         
-        return crow::response(200, type, file);
+        crow::response res;
+        res.code = 200;
+        res.set_header("Content-Type", type);
+        res.set_header("Content-Length", std::to_string(data.totalSize));
+        res.set_header("Content-Disposition", "inline; filename=\"" + data.fileName + "\"");
+
+    
+        res.body = std::move(data.data);
+        return res;
     });
 }
 

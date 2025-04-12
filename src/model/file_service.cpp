@@ -49,16 +49,19 @@ std::string FileService::saveAlbumCover(const std::string& name, const char* byt
     return std::filesystem::absolute(filePath);
 }
 
-const std::string FileService::getFile(std::filesystem::path path) const {
+const FileData FileService::getFile(std::filesystem::path path) const {
     std::ifstream file(path, std::ios::binary);
-    if (!file.is_open()) return "";
+    if (!file.is_open()) return {"", 0, 0, "", ""};
     
     std::ostringstream strStream;
     strStream << file.rdbuf();
-    return strStream.str();
+
+    file.seekg(0, std::ios::end);
+    size_t size = file.tellg();
+    return {strStream.str(), size, size, path.filename().string(), path.extension().string()};
 }
 
-const Chunk FileService::getChunk(std::filesystem::path path, std::streamsize start, std::streamsize end) const {
+const FileData FileService::getChunk(std::filesystem::path path, std::streamsize start, std::streamsize end) const {
     std::ifstream file(path, std::ios::binary);
     if (!file) return {"", 0, 0, ""};
     
@@ -77,5 +80,11 @@ const Chunk FileService::getChunk(std::filesystem::path path, std::streamsize st
     std::streamsize bytesRead = file.gcount();
 
     buffer.resize(bytesRead);
-    return {std::move(buffer), static_cast<size_t>(bytesRead), static_cast<size_t>(fileSize), path.extension().string()};
+    return {
+        std::move(buffer), 
+        static_cast<size_t>(bytesRead), 
+        static_cast<size_t>(fileSize), 
+        path.filename().string(), 
+        path.extension().string()
+    };
 }

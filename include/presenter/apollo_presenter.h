@@ -25,15 +25,13 @@ public:
 
     const Lyrics getSongLyrics(int songId) const override;
 
-    const FileChunk getFileChunk(int id, size_t start, size_t end = 0) const override;
-    const std::string getsongFileName(int id) const override;
-
+    const FileData getFileChunk(int id, size_t start, size_t end = 0) const override;
 
 
     const std::vector<Album> getAllAlbums() const override;
     const Album getAlbum(int id) const override;
 
-    const std::pair<std::string, std::string> dloadAlbumCover(int id) const override;
+    const FileData dloadAlbumCover(int id) const override;
     bool uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) override;
 
 
@@ -49,7 +47,7 @@ public:
     bool addSongToPlaylist(int playlistId, int songId) override;
     bool removeSongFromPlaylist(int playlistId, int songId) override;
 
-    const std::pair<std::string, std::string> dloadPlaylistCover(int id) const override;
+    const FileData dloadPlaylistCover(int id) const override;
     bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) override;
 
 private:

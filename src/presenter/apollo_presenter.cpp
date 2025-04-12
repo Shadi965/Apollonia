@@ -33,15 +33,10 @@ const Lyrics ApolloPresenter::getSongLyrics(int songId) const {
     
     return lrc;
 }
-const FileChunk ApolloPresenter::getFileChunk(int id, size_t start, size_t end) const {
+const FileData ApolloPresenter::getFileChunk(int id, size_t start, size_t end) const {
     if (end == 0) end = start + 524'288;
     std::string path = _sr.getSongPathById(id);
-    Chunk chunk = _fs.getChunk(path, start, end);
-    return {chunk.data, chunk.size, chunk.totalSize, chunk.extension};
-}
-const std::string ApolloPresenter::getsongFileName(int id) const {
-    std::filesystem::path path = _sr.getSongPathById(id);
-    return path.filename().string();
+    return _fs.getChunk(path, start, end);
 }
 
 const std::vector<Album> ApolloPresenter::getAllAlbums() const {
@@ -58,10 +53,9 @@ const Album ApolloPresenter::getAlbum(int id) const {
     return toAlbum(_ar.getAlbumById(id));
 }
 
-const std::pair<std::string, std::string> ApolloPresenter::dloadAlbumCover(int id) const {
+const FileData ApolloPresenter::dloadAlbumCover(int id) const {
     std::filesystem::path path = _ar.getAlbumCoverPath(id);
-    std::string ext = path.extension().string();
-    return {_fs.getFile(path), ext};
+    return _fs.getFile(path);
 }
 bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) {
     std::string name = std::to_string(id) + '_' + _ar.getAlbumById(id).title + fileExtension;
@@ -106,10 +100,9 @@ bool ApolloPresenter::removeSongFromPlaylist(int playlistId, int songId){
     return _pr.removeSongFromPlaylist(playlistId, songId);
 }
 
-const std::pair<std::string, std::string> ApolloPresenter::dloadPlaylistCover(int id) const {
+const FileData ApolloPresenter::dloadPlaylistCover(int id) const {
     std::filesystem::path path = _pr.getPlaylistCoverPath(id);
-    std::string ext = path.extension().string();
-    return {_fs.getFile(path), ext};
+    return _fs.getFile(path);
 }
 bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) {
     std::string name = std::to_string(id) + '_' + _pr.getPlaylistById(id).name + fileExtension;

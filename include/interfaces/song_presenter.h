@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 
+#include "interfaces/file_service.h"
+
 struct Song {
     int id;
     std::string title;
@@ -28,13 +30,6 @@ struct Lyrics {
     std::vector<std::pair<int, std::string>> lrc;
 };
 
-struct FileChunk {
-    std::string data;
-    size_t size;
-    size_t totalSize;
-    std::string extension;
-};
-
 class ISongPresenter {
 public:
     virtual ~ISongPresenter() = default;
@@ -45,8 +40,7 @@ public:
 
     virtual const Lyrics getSongLyrics(int songId) const = 0;
 
-    virtual const FileChunk getFileChunk(int id, size_t start, size_t end) const = 0;
-    virtual const std::string getsongFileName(int id) const = 0;
+    virtual const FileData getFileChunk(int id, size_t start, size_t end) const = 0;
 };
 
 #endif // I_SONG_PRESENTER_H
