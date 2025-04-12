@@ -33,7 +33,12 @@ const Lyrics ApolloPresenter::getSongLyrics(int songId) const {
     
     return lrc;
 }
-
+const FileChunk ApolloPresenter::getFileChunk(int id, size_t start, size_t end) const {
+    if (end == 0) end = start + 524'288;
+    std::string path = _sr.getSongPathById(id);
+    Chunk chunk = _fs.getChunk(path, start, end);
+    return {chunk.data, chunk.size, chunk.totalSize, chunk.extension};
+}
 
 
 const std::vector<Album> ApolloPresenter::getAllAlbums() const {

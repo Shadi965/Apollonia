@@ -9,6 +9,30 @@ void RoutesManager::runApp() {
 }
 
 void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
+
+    static const std::unordered_map<std::string, std::string> mediaTypes{
+        {".mp3",  "audio/mpeg"},
+        {".m4a",  "audio/mp4"},
+        {".aac",  "audio/aac"},
+        {".wav",  "audio/wav"},
+        {".flac", "audio/flac"},
+        {".ogg",  "audio/ogg"},
+        {".opus", "audio/opus"},
+        {".webm", "audio/webm"},
+        {".mid",  "audio/midi"},
+        {".midi", "audio/midi"},
+    
+        {".mp4",  "video/mp4"},
+        {".m4v",  "video/mp4"},
+        {".mov",  "video/quicktime"},
+        {".webm", "video/webm"},
+        {".ogv",  "video/ogg"},
+        {".3gp",  "video/3gpp"},
+        {".avi",  "video/x-msvideo"},
+        {".mkv",  "video/x-matroska"},
+        {".flv",  "video/x-flv"}
+    };
+
     CROW_ROUTE(app, "/songs/")([&sp]() {
         return statusResponse(200, "success", songsJson(sp.getAllSongs()), "songs");
     });
@@ -27,12 +51,41 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
     });
 
     CROW_ROUTE(app, "/stream/<int>")([&sp](const crow::request& req, int id) {
-        return crow::response(501);
+        size_t start = 0;
+        size_t end = 0;
+    
+        std::string rangeHeader = req.get_header_value("Range");
+        if (!rangeHeader.empty())
+            sscanf(rangeHeader.c_str(), "bytes=%zu-%zu", &start, &end);
+    
+        FileChunk chunk = sp.getFileChunk(id, start, end);
+
+        std::string contentType;
+        auto it = mediaTypes.find(chunk.extension);
+        if (it == mediaTypes.end())
+            contentType = "audio/mpeg";
+        else
+            contentType = it->second;
+
+        crow::response res;
+        res.code = 206;
+        res.set_header("Content-Type", contentType);
+        res.set_header("Accept-Ranges", "bytes");
+        res.set_header("Content-Length", std::to_string(chunk.size));
+    
+        std::string contentRange = "bytes " + std::to_string(start) + "-" + 
+                                              std::to_string(start + chunk.size - 1) + "/" + 
+                                              std::to_string(chunk.totalSize);
+        res.set_header("Content-Range", contentRange);
+    
+        res.body = std::move(chunk.data);
+        return res;
     });
 
     CROW_ROUTE(app, "/download/<int>")([&sp](int id) {
         return crow::response(501);
     });
+
 }
 
 void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {

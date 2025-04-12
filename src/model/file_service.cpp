@@ -57,3 +57,25 @@ const std::string FileService::getFile(std::filesystem::path path) const {
     strStream << file.rdbuf();
     return strStream.str();
 }
+
+const Chunk FileService::getChunk(std::filesystem::path path, std::streamsize start, std::streamsize end) const {
+    std::ifstream file(path, std::ios::binary);
+    if (!file) return {"", 0, 0, ""};
+    
+    file.seekg(0, std::ios::end);
+    std::streamsize fileSize = file.tellg();
+
+    if (start >= fileSize) return {"", 0, 0, ""};
+
+    if (end >= fileSize) end = fileSize - 1;
+
+    std::streamsize length = end - start + 1;
+    std::string buffer(length, '\0');
+
+    file.seekg(start, std::ios::beg);
+    file.read(&buffer[0], length);
+    std::streamsize bytesRead = file.gcount();
+
+    buffer.resize(bytesRead);
+    return {std::move(buffer), static_cast<size_t>(bytesRead), static_cast<size_t>(fileSize), path.extension().string()};
+}

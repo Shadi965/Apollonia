@@ -16,6 +16,10 @@ SongMetaEntity ApolloRepository::getSongMetaById(int id) const {
     return _songMetaDao.getSongDataById(id);
 }
 
+std::string ApolloRepository::getSongPathById(int id) const {
+    return _songMetaDao.getFilePathBySongId(id);
+}
+
 std::vector<LyricLineEntity> ApolloRepository::getSongLyricsById(int id) const {
     return _lyricsDao.getLyricsForSong(id);
 }

@@ -23,6 +23,8 @@ public:
     SongEntity getSongById(int id) const override;
 
     SongMetaEntity getSongMetaById(int id) const override;
+    std::string getSongPathById(int id) const override;
+    
 
     std::vector<LyricLineEntity> getSongLyricsById(int id) const override;
 

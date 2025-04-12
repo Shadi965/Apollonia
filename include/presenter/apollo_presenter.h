@@ -25,7 +25,7 @@ public:
 
     const Lyrics getSongLyrics(int songId) const override;
 
-    // virtual songstr songStream(int id) = 0;
+    const FileChunk getFileChunk(int id, size_t start, size_t end = 0) const override;
     // virtual song dloadSong(int id) = 0;
 
 
