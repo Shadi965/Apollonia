@@ -51,11 +51,14 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
 
     CROW_ROUTE(app, "/album/cover/<int>").methods(crow::HTTPMethod::PUT)
     ([&ap](const crow::request& req, int id) {
-        if (req.get_header_value("Content-Type") == "application/octet-stream") {
-            if (ap.uploadAlbumCover(id, req.body.data(), req.body.size()))
+        std::string ext = parseImgFileExt(req);
+        if (ext.empty())
+            return statusResponse(415, "fail", "Expected image type");
+        
+        if (ap.uploadAlbumCover(id, req.body.data(), req.body.size(), ext))
                 return statusResponse(200, "success");
-        }
-        return statusResponse(404, "fail");
+        
+        return statusResponse(500);
     });
 }
 
@@ -138,11 +141,14 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
 
     CROW_ROUTE(app, "/playlist/cover/<int>").methods(crow::HTTPMethod::PUT)
     ([&pp](const crow::request& req, int id) {
-        if (req.get_header_value("Content-Type") == "application/octet-stream") {
-            if (pp.uploadPlaylistCover(id, req.body.data(), req.body.size()))
+        std::string ext = parseImgFileExt(req);
+        if (ext.empty())
+            return statusResponse(415, "fail", "Expected image type");
+        
+        if (pp.uploadPlaylistCover(id, req.body.data(), req.body.size(), ext))
                 return statusResponse(200, "success");
-        }
-        return statusResponse(404, "fail");
+        
+        return statusResponse(500);
     });
 }
 
@@ -169,6 +175,9 @@ crow::response RoutesManager::statusResponse(int code, const std::string& status
     result["status"] = status;
 
     return crow::response(code, result);
+}
+crow::response RoutesManager::statusResponse(int code) {
+    return crow::response(code);
 }
 
 crow::json::wvalue RoutesManager::songsJson(const std::vector<Song>& songs) {
@@ -275,4 +284,20 @@ int RoutesManager::parseIntKey(const crow::request& req, const std::string& key)
     catch(const std::runtime_error& e) {
         return 0;
     }
+}
+
+std::string RoutesManager::parseImgFileExt(const crow::request& req) {
+    std::string type = req.get_header_value("Content-Type");
+
+    size_t pos = type.find('/');
+    if (pos == std::string::npos) return "";
+
+    std::string ext = type.substr(pos + 1);
+    type = type.substr(0, pos);
+    if (type != "image") return "";
+    
+    if (ext == "svg+xml") return "svg";
+    if (ext == "x-icon") return "ico";
+    
+    return ext;
 }

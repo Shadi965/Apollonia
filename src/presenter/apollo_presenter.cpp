@@ -50,8 +50,8 @@ const Album ApolloPresenter::getAlbum(int id) const {
     return toAlbum(_ar.getAlbumById(id));
 }
 
-bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsize size) {
-    std::string name = std::to_string(id) + '_' + _ar.getAlbumById(id).title;
+bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) {
+    std::string name = std::to_string(id) + '_' + _ar.getAlbumById(id).title + '.' + fileExtension;
     std::replace(name.begin(), name.end(), ' ', '_');
     std::string path = _fs.saveAlbumCover(name, bytes, size);
     if (path.empty())
@@ -93,8 +93,8 @@ bool ApolloPresenter::removeSongFromPlaylist(int playlistId, int songId){
     return _pr.removeSongFromPlaylist(playlistId, songId);
 }
 
-bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::streamsize size) {
-    std::string name = std::to_string(id) + '_' + _pr.getPlaylistById(id).name;
+bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) {
+    std::string name = std::to_string(id) + '_' + _pr.getPlaylistById(id).name + '.' + fileExtension;
     std::replace(name.begin(), name.end(), ' ', '_');
     std::string path = _fs.savePlaylistCover(name, bytes, size);
     if (path.empty())

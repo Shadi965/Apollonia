@@ -34,7 +34,7 @@ public:
     const Album getAlbum(int id) const override;
 
     // virtual img dloadAlbumCover(int id) = 0;
-    bool uploadAlbumCover(int id, const char* bytes, std::streamsize size) override;
+    bool uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) override;
 
 
 
@@ -50,7 +50,7 @@ public:
     bool removeSongFromPlaylist(int playlistId, int songId) override;
 
     // virtual img dloadPlaylistCover(int id) = 0;
-    bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size) override;
+    bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) override;
 
 private:
     ISongRepository& _sr;
