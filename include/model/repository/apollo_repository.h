@@ -30,7 +30,8 @@ public:
 
     std::vector<AlbumEntity> getAllAlbums() const override;
     AlbumEntity getAlbumById(int id) const override;
-    
+
+    std::string getAlbumCoverPath(int id) const override;
     bool updateAlbumCoverPath(int id, const std::string& coverPath) override;
 
 
@@ -48,6 +49,7 @@ public:
     bool addSongToPlaylist(int playlistId, int songId) override;
     bool removeSongFromPlaylist(int playlistId, int songId) override;
 
+    std::string getPlaylistCoverPath(int id) const override;
     bool updatePlaylistCoverPath(int id, const std::string& coverPath) override;
 
 private:

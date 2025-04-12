@@ -27,7 +27,7 @@ public:
     virtual bool addSongToPlaylist(int playlistId, int songId) = 0;
     virtual bool removeSongFromPlaylist(int playlistId, int songId) = 0;
 
-    // virtual img dloadPlaylistCover(int id) = 0;
+    virtual const std::pair<std::string, std::string> dloadPlaylistCover(int id) const = 0;
     virtual bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) = 0;
 };
 

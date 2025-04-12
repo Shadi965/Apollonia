@@ -26,7 +26,7 @@ public:
     virtual const std::vector<Album> getAllAlbums() const = 0;
     virtual const Album getAlbum(int id) const = 0;
 
-    // virtual img dloadAlbumCover(int id) = 0;
+    virtual const std::pair<std::string, std::string> dloadAlbumCover(int id) const = 0;
     virtual bool uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) = 0;
 
 };

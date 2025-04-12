@@ -3,8 +3,6 @@
 #ifndef FILE_SERVICE_H
 #define FILE_SERVICE_H
 
-#include <filesystem>
-
 #include "interfaces/file_service.h"
 
 class FileService : public IFileService {
@@ -14,6 +12,8 @@ public:
 
     std::string savePlaylistCover(const std::string& name, const char* bytes, std::streamsize size) override;
     std::string saveAlbumCover(const std::string& name, const char* bytes, std::streamsize size) override;
+
+    const std::string getFile(std::filesystem::path path) const override;
 
 private:
     std::filesystem::path _pCoversDir;

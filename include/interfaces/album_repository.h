@@ -14,6 +14,7 @@ public:
     virtual std::vector<AlbumEntity> getAllAlbums() const = 0;
     virtual AlbumEntity getAlbumById(int id) const = 0;
 
+    virtual std::string getAlbumCoverPath(int id) const = 0;
     virtual bool updateAlbumCoverPath(int id, const std::string& coverPath) = 0;
     
 };

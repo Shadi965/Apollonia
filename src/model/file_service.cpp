@@ -48,3 +48,12 @@ std::string FileService::saveAlbumCover(const std::string& name, const char* byt
     outFile.close();
     return std::filesystem::absolute(filePath);
 }
+
+const std::string FileService::getFile(std::filesystem::path path) const {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open()) return "";
+    
+    std::ostringstream strStream;
+    strStream << file.rdbuf();
+    return strStream.str();
+}

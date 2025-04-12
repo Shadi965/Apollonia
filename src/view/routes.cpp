@@ -60,6 +60,18 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
         
         return statusResponse(500);
     });
+
+    CROW_ROUTE(app, "/album/cover/<int>").methods(crow::HTTPMethod::GET)
+    ([&ap](int id) {
+        auto [file, ext] = ap.dloadAlbumCover(id);
+        if (file.empty() || ext.empty())
+            return statusResponse(404, "fail", "Cover not found for this album");
+        std::string type = imageTypeByExtension(ext);
+        if (type.empty())
+            return statusResponse(404, "fail", "Cover not found for this album");        
+        
+        return crow::response(200, type, file);
+    });
 }
 
 void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
@@ -149,6 +161,18 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
                 return statusResponse(200, "success");
         
         return statusResponse(500);
+    });
+
+    CROW_ROUTE(app, "/playlist/cover/<int>").methods(crow::HTTPMethod::GET)
+    ([&pp](int id) {
+        auto [file, ext] = pp.dloadPlaylistCover(id);
+        if (file.empty() || ext.empty())
+            return statusResponse(404, "fail", "Cover not found for this playlist");
+        std::string type = imageTypeByExtension(ext);
+        if (type.empty())
+            return statusResponse(404, "fail", "Cover not found for this playlist");        
+        
+        return crow::response(200, type, file);
     });
 }
 
@@ -300,4 +324,28 @@ std::string RoutesManager::parseImgFileExt(const crow::request& req) {
     if (ext == "x-icon") return "ico";
     
     return ext;
+}
+
+std::string RoutesManager::imageTypeByExtension(const std::string& ext) {
+    static const std::unordered_map<std::string, std::string> imageTypes = {
+        {".jpeg", "image/jpeg"},
+        {".jpg",  "image/jpeg"},
+        {".jfif", "image/jpeg"},
+        {".png",  "image/png"},
+        {".gif",  "image/gif"},
+        {".bmp",  "image/bmp"},
+        {".webp", "image/webp"},
+        {".tiff", "image/tiff"},
+        {".tif",  "image/tiff"},
+        {".svg",  "image/svg+xml"},
+        {".ico",  "image/x-icon"},
+        {".heic", "image/heic"},
+        {".heif", "image/heif"}
+    };
+
+    auto it = imageTypes.find(ext);
+    if (it == imageTypes.end())
+        return "";
+    
+    return it->second;
 }

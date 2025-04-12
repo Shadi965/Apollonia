@@ -44,6 +44,7 @@ private:
     static int parseIntKey(const crow::request& req, const std::string& key);
 
     static std::string parseImgFileExt(const crow::request& req);
+    static std::string imageTypeByExtension(const std::string& extension);
 };
 
 #endif // ROUTES_H

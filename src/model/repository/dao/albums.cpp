@@ -62,6 +62,15 @@ std::vector<int> AlbumDao::getAllAlbumsIds() const {
 
     return ids;
 }
+std::string AlbumDao::getAlbumCoverPathById(int id) const {
+    SQLite::Statement query(_db, "SELECT cover_path FROM albums WHERE id = ?");
+    query.bind(1, id);
+
+    if (!query.executeStep()) 
+        return "";
+
+    return query.getColumn(0).getString();
+}
 
 int AlbumDao::findAlbum(const std::string& artist, const std::string& title) const {
     SQLite::Statement query(_db, "SELECT id FROM albums WHERE title = ? AND artist = ?");

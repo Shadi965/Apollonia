@@ -32,6 +32,7 @@ public:
     AlbumEntity getAlbumById(int albumId) const;
     std::string getAlbumTitleById(int albumId) const;
     std::vector<int> getAllAlbumsIds() const;
+    std::string getAlbumCoverPathById(int id) const;
 
     int findAlbum(const std::string& artist, const std::string& title) const;
 

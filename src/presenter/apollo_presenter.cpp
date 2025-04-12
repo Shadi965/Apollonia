@@ -50,6 +50,11 @@ const Album ApolloPresenter::getAlbum(int id) const {
     return toAlbum(_ar.getAlbumById(id));
 }
 
+const std::pair<std::string, std::string> ApolloPresenter::dloadAlbumCover(int id) const {
+    std::filesystem::path path = _ar.getAlbumCoverPath(id);
+    std::string ext = path.extension().string();
+    return {_fs.getFile(path), ext};
+}
 bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) {
     std::string name = std::to_string(id) + '_' + _ar.getAlbumById(id).title + '.' + fileExtension;
     std::replace(name.begin(), name.end(), ' ', '_');
@@ -93,6 +98,11 @@ bool ApolloPresenter::removeSongFromPlaylist(int playlistId, int songId){
     return _pr.removeSongFromPlaylist(playlistId, songId);
 }
 
+const std::pair<std::string, std::string> ApolloPresenter::dloadPlaylistCover(int id) const {
+    std::filesystem::path path = _pr.getPlaylistCoverPath(id);
+    std::string ext = path.extension().string();
+    return {_fs.getFile(path), ext};
+}
 bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) {
     std::string name = std::to_string(id) + '_' + _pr.getPlaylistById(id).name + '.' + fileExtension;
     std::replace(name.begin(), name.end(), ' ', '_');

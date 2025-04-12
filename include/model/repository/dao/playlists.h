@@ -22,6 +22,7 @@ public:
 
     std::vector<PlaylistEntity> getAllPlaylists() const;
     PlaylistEntity getPlaylistById(int id) const;
+    std::string getPlaylistCoverPathById(int id) const;
 
     int insertPlaylist(const PlaylistEntity& playlist);
     bool updatePlaylistName(int id, const std::string& newName);

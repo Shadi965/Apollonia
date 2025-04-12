@@ -29,6 +29,9 @@ AlbumEntity ApolloRepository::getAlbumById(int id) const {
     return _albumDao.getAlbumById(id);
 }
 
+std::string ApolloRepository::getAlbumCoverPath(int id) const {
+    return _albumDao.getAlbumCoverPathById(id);
+}
 bool ApolloRepository::updateAlbumCoverPath(int id, const std::string& coverPath) {
     return _albumDao.updateAlbumCoverPath(id, coverPath);
 }
@@ -63,6 +66,9 @@ bool ApolloRepository::removeSongFromPlaylist(int playlistId, int songId) {
     return _playlistSongDao.removeSongFromPlaylist(playlistId, songId);
 }
 
+std::string ApolloRepository::getPlaylistCoverPath(int id) const {
+    return _playlistDao.getPlaylistCoverPathById(id);
+}
 bool ApolloRepository::updatePlaylistCoverPath(int id, const std::string& coverPath) {
     return _playlistDao.updatePlaylistCoverPath(id, coverPath);
 }
