@@ -73,6 +73,7 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         res.set_header("Accept-Ranges", "bytes");
         res.set_header("Content-Length", std::to_string(chunk.size));
         res.set_header("Content-Disposition", "inline; filename=\"" + chunk.fileName + "\"");
+        res.set_header("ETag", "\"" + std::to_string(chunk.totalSize) + "-" + chunk.fileName + "\"");
     
         std::string contentRange = "bytes " + std::to_string(start) + "-" + 
                                               std::to_string(start + chunk.size - 1) + "/" + 
@@ -162,6 +163,7 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
         res.set_header("Content-Type", type);
         res.set_header("Content-Length", std::to_string(data.totalSize));
         res.set_header("Content-Disposition", "inline; filename=\"" + data.fileName + "\"");
+        res.set_header("ETag", "\"" + std::to_string(data.totalSize) + "-" + data.fileName + "\"");
 
     
         res.body = std::move(data.data);
@@ -272,6 +274,7 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
         res.set_header("Content-Type", type);
         res.set_header("Content-Length", std::to_string(data.totalSize));
         res.set_header("Content-Disposition", "inline; filename=\"" + data.fileName + "\"");
+        res.set_header("ETag", "\"" + std::to_string(data.totalSize) + "-" + data.fileName + "\"");
 
     
         res.body = std::move(data.data);
