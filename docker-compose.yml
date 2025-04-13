@@ -5,8 +5,7 @@ services:
       - "80:80"
       - "8080:8080"
     volumes:
-      - "/mnt/c/Users/Shadi/Music/Apple Music/Media/Music:/mnt/music"
+      - "/mnt/c:/mnt/c"
       - ./build/Apollonia:/usr/local/bin/Apollonia
       - ./build/songs.db:/var/lib/Apollonia/songs.db
-      - ./build/tracks_info.json:/var/lib/Apollonia/tracks_info.json
-
+      # - ./build/tracks_info.json:/var/lib/Apollonia/tracks_info.json

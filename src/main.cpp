@@ -6,8 +6,11 @@
 #include "file_service.h"
 #include "db_manager.h"
 
-#define PORT 8080
-#define DB_PATH "./songs.db"
+#define PORT 80
+#define DB_PATH "/var/lib/Apollonia/songs.db"
+
+// #define PORT 8080
+// #define DB_PATH "./songs.db"
 
 int main() {
     DatabaseManager dbManager(DB_PATH);

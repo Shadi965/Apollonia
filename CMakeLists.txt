@@ -2,18 +2,6 @@ cmake_minimum_required(VERSION 3.14)
 project(Apollonia VERSION 0.3.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
-
-
-# add_custom_command(TARGET Apollonia PRE_BUILD
-#     COMMAND echo "Остановка контейнера"
-#     COMMAND docker-compose down
-# )
-
-# add_custom_command(TARGET Apollonia POST_BUILD
-#     COMMAND echo "Запуск контейнера с сервером"
-#     COMMAND docker-compose up -d
-# )
-
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 
 
@@ -56,6 +44,16 @@ target_link_libraries(dao
 
 add_executable(Apollonia ${PROJECT_SOURCES})
 target_link_libraries(Apollonia dao pthread)
+
+# add_custom_command(TARGET Apollonia PRE_BUILD
+#     COMMAND echo "Остановка контейнера"
+#     COMMAND docker-compose down
+# )
+
+# add_custom_command(TARGET Apollonia POST_BUILD
+#     COMMAND echo "Запуск контейнера с сервером"
+#     COMMAND docker-compose up -d
+# )
 
 # target_link_libraries(Apollonia
 #                       SQLiteCpp
