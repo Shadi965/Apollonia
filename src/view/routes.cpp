@@ -83,26 +83,38 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         return res;
     });
 
-    CROW_ROUTE(app, "/download/<int>")([&sp](int id) {
+    CROW_ROUTE(app, "/download/<int>")([&sp](const crow::request& req, int id) {
         size_t start = 0;
         size_t end = std::numeric_limits<size_t>::max();
     
+        const std::string& rangeHeader = req.get_header_value("Range");
+        if (!rangeHeader.empty())
+            sscanf(rangeHeader.c_str(), "bytes=%zu-%zu", &start, &end);
+    
         FileData chunk = sp.getFileChunk(id, start, end);
-
+    
         std::string contentType;
         auto it = mediaTypes.find(chunk.extension);
-        if (it == mediaTypes.end())
-            contentType = "audio/mpeg";
-        else
-            contentType = it->second;
-
+        contentType = (it != mediaTypes.end()) ? it->second : "application/octet-stream";
+    
         crow::response res;
-        res.code = 200;
+    
+        bool isPartial = !rangeHeader.empty();
+    
+        res.code = isPartial ? 206 : 200;
         res.set_header("Content-Type", contentType);
         res.set_header("Accept-Ranges", "bytes");
         res.set_header("Content-Length", std::to_string(chunk.size));
         res.set_header("Content-Disposition", "attachment; filename=\"" + chunk.fileName + "\"");
-
+        res.set_header("ETag", "\"" + std::to_string(chunk.totalSize) + "-" + chunk.fileName + "\"");
+        
+        if (isPartial) {
+            res.set_header(
+                "Content-Range",
+                "bytes " + std::to_string(start) + "-" + std::to_string(start + chunk.size - 1) +
+                "/" + std::to_string(chunk.totalSize)
+            );
+        }
     
         res.body = std::move(chunk.data);
         return res;
