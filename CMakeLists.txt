@@ -55,6 +55,15 @@ target_link_libraries(Apollonia dao pthread)
 #     COMMAND docker-compose up -d
 # )
 
+enable_testing()
+
+add_executable(db_tests tests/test_db_manager.cpp
+                        src/model/repository/db_manager.cpp)
+
+target_link_libraries(db_tests SQLiteCpp gtest gtest_main)
+
+add_test(NAME db_tests COMMAND db_tests)
+
 # target_link_libraries(Apollonia
 #                       SQLiteCpp
 #                       sqlite3
