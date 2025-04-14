@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <filesystem>
 
 #include "db_manager.h"
 #include "albums.h"
@@ -15,6 +16,11 @@ protected:
     void TearDown() override {
         db.exec("DELETE FROM albums; VACUUM;");
         db.exec("UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'albums';");
+    }
+
+    static void TearDownTestSuite() {
+        if (std::filesystem::exists("test_music.db"))
+            std::filesystem::remove("test_music.db");
     }
 
     static bool compareAlbums(const AlbumEntity& first, const AlbumEntity& second) {

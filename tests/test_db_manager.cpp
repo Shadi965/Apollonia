@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
-#include "db_manager.h"
 #include <filesystem>
 #include <SQLiteCpp/SQLiteCpp.h>
+
+#include "db_manager.h"
 
 class DatabaseManagerTest : public ::testing::Test {
 protected:
