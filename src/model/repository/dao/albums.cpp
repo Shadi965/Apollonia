@@ -1,5 +1,6 @@
-#include "albums.h"
+#include <sqlite3.h>
 
+#include "albums.h"
 AlbumDao::AlbumDao(SQLite::Database& db): _db(db) {};
 
 std::vector<AlbumEntity> AlbumDao::getAllAlbums() const {
@@ -67,24 +68,23 @@ std::string AlbumDao::getAlbumCoverPathById(int id) const {
     query.bind(1, id);
 
     if (!query.executeStep()) 
-        return "";
+        throw AlbumNotFoundException(id);
 
     return query.getColumn(0).getString();
 }
 
-int AlbumDao::findAlbum(const std::string& artist, const std::string& title) const {
+int AlbumDao::checkAlbumExists(const std::string& artist, const std::string& title) const {
     SQLite::Statement query(_db, "SELECT id FROM albums WHERE title = ? AND artist = ?");
     query.bind(1, title);
     query.bind(2, artist);
     
-    return query.executeStep() ? query.getColumn(0).getInt64() : 0LL;
+    return query.executeStep() ? query.getColumn(0).getInt() : 0;
 }
 
 int AlbumDao::insertAlbum(const AlbumEntity& album) {
-    // TODO: Возможна ошибка из-за дублирования title + artist
     SQLite::Statement query(_db, 
-        "INSERT INTO albums (title, artist, track_count, disc_count, compilation, date, copyright, genre) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO albums (title, artist, track_count, disc_count, compilation, date, copyright, genre, cover_path) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
     query.bind(1, album.title);
     query.bind(2, album.artist);
@@ -94,8 +94,17 @@ int AlbumDao::insertAlbum(const AlbumEntity& album) {
     query.bind(6, album.date);
     query.bind(7, album.copyright);
     query.bind(8, album.genre);
+    query.bind(9, album.cover_path);
 
-    query.executeStep();
+    try {
+        query.executeStep();
+    }
+    catch(const SQLite::Exception& e) {
+        if (e.getExtendedErrorCode() == SQLITE_CONSTRAINT_UNIQUE)
+            return 0;
+        throw e;
+    }
+    
 
     return _db.getLastInsertRowid();
 }
@@ -108,7 +117,6 @@ bool AlbumDao::updateAlbumDateAndGenre(int albumId, const std::string& newDate, 
     query.executeStep();
     return _db.getChanges() != 0;
 }
-
 bool AlbumDao::updateAlbumCoverPath(int id, const std::string& coverPath) {
     SQLite::Statement query(_db, "UPDATE albums SET cover_path = ? WHERE id = ?");
     query.bind(1, coverPath);

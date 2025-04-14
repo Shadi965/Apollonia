@@ -34,9 +34,9 @@ public:
     std::vector<int> getAllAlbumsIds() const;
     std::string getAlbumCoverPathById(int id) const;
 
-    int findAlbum(const std::string& artist, const std::string& title) const;
+    int checkAlbumExists(const std::string& artist, const std::string& title) const;
 
-    int insertAlbum(const AlbumEntity& album);    
+    int insertAlbum(const AlbumEntity& album);
     bool updateAlbumDateAndGenre(int albumId, const std::string& newDate, const std::string& newGenre);
     bool updateAlbumCoverPath(int id, const std::string& coverPath);
 
