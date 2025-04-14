@@ -4,9 +4,11 @@
 
 #include "db_manager.h"
 
+#define DB_NAME "test_db_manager.db"
+
 class DatabaseManagerTest : public ::testing::Test {
 protected:
-    std::string testDbPath = "test_music.db";
+    std::string testDbPath = DB_NAME;
 
     void TearDown() override {
         if (std::filesystem::exists(testDbPath))
