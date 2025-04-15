@@ -15,17 +15,18 @@ private:
     SQLite::Database _db;
 
 
-    void createSongs();
-    void createSongsMeta();
+    void createSongs(const std::string& tableName);
+    void createSongsMeta(const std::string& tableName);
     void createAlbums(const std::string& tableName);
     void createPlaylists(const std::string& tableName);
-    void createLyrics();
-    void createPlaylistSongs();
+    void createLyrics(const std::string& tableName);
+    void createPlaylistSongs(const std::string& tableName);
 
     void initDB();
     int checkVersion();
 
-    void from_v1_to_v2();
+    void v1_to_v2();
+    void v2_to_v3();
 };
 
 

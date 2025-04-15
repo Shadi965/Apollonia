@@ -72,6 +72,8 @@ int SongDao::insertSong(const SongEntity& song) {
     catch(const SQLite::Exception& e) {
         if (e.getExtendedErrorCode() == SQLITE_CONSTRAINT_FOREIGNKEY)
             throw AlbumNotFoundException(song.album_id);
+        if (e.getExtendedErrorCode() == SQLITE_CONSTRAINT_UNIQUE)
+            throw SongAlreadyExists();
         throw e;
     }
     

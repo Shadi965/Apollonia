@@ -14,6 +14,7 @@
 //     song_id INTEGER NOT NULL, 
 //     time_ms INTEGER NOT NULL, 
 //     line TEXT NOT NULL, 
+//     UNIQUE (song_id, time_ms), 
 //     FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);
 //
 // CREATE INDEX IF NOT EXISTS idx_lyrics_song_time ON lyrics(song_id, time_ms);

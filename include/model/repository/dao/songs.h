@@ -20,6 +20,7 @@
 //     date TEXT, 
 //     copyright TEXT, 
 //     genre TEXT, 
+//     UNIQUE(album_id, track, disc), 
 //     FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE SET NULL);
 //
 // CREATE INDEX IF NOT EXISTS idx_songs_album_id ON songs(album_id);

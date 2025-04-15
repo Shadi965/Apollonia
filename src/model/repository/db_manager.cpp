@@ -8,7 +8,11 @@ DatabaseManager::DatabaseManager(const std::string& dbPath) : _db(dbPath, SQLite
         initDB();
         break;
     case 1:
-        from_v1_to_v2();
+        v1_to_v2();
+        v2_to_v3();
+        break;
+    case 2:
+        v2_to_v3();
         break;
     default:
         break;
@@ -19,8 +23,8 @@ SQLite::Database& DatabaseManager::getDb() {
     return _db;
 }
 
-void DatabaseManager::createSongs() {
-    _db.exec("CREATE TABLE IF NOT EXISTS songs ("
+void DatabaseManager::createSongs(const std::string& tableName = "songs") {
+    _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "id INTEGER PRIMARY KEY, "
         "title TEXT, "
         "artist TEXT, "
@@ -31,15 +35,16 @@ void DatabaseManager::createSongs() {
         "date TEXT, "
         "copyright TEXT, "
         "genre TEXT, "
+        "UNIQUE(album_id, track, disc), "
         "FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE SET NULL);"
 
         "CREATE INDEX IF NOT EXISTS idx_songs_album_id ON songs(album_id);"
     );
 }
 
-void DatabaseManager::createSongsMeta() {
-    _db.exec("CREATE TABLE IF NOT EXISTS songs_meta ("
-        "song_id INTEGER, "
+void DatabaseManager::createSongsMeta(const std::string& tableName = "songs_meta") {
+    _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
+        "song_id INTEGER UNIQUE NOT NULL, "
         "duration INTEGER, "
         "bitrate INTEGER, "
         "channels INTEGER, "
@@ -70,26 +75,31 @@ void DatabaseManager::createPlaylists(const std::string& tableName = "playlists"
     _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "id INTEGER PRIMARY KEY, "
         "name TEXT, "
-        "cover_path TEXT);");
+        "cover_path TEXT);"
+    );
 }
 
-void DatabaseManager::createLyrics() {
-    _db.exec("CREATE TABLE IF NOT EXISTS lyrics ("
+void DatabaseManager::createLyrics(const std::string& tableName = "lyrics") {
+    _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "song_id INTEGER NOT NULL, "
         "time_ms INTEGER NOT NULL, "
         "line TEXT NOT NULL, "
-        "FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);");
+        "UNIQUE (song_id, time_ms), "
+        "FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);"
 
-    _db.exec("CREATE INDEX IF NOT EXISTS idx_lyrics_song_time ON lyrics(song_id, time_ms);");
+        "CREATE INDEX IF NOT EXISTS idx_lyrics_song_time ON lyrics(song_id, time_ms);"
+    );
 }
 
-void DatabaseManager::createPlaylistSongs() {
-    _db.exec("CREATE TABLE IF NOT EXISTS playlist_songs ("
+void DatabaseManager::createPlaylistSongs(const std::string& tableName = "playlist_songs") {
+    _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "playlist_id INTEGER NOT NULL, "
         "song_id INTEGER NOT NULL, "
+        "UNIQUE (playlist_id, song_id), "
         "PRIMARY KEY(playlist_id, song_id), "
         "FOREIGN KEY(playlist_id) REFERENCES playlists(id) ON DELETE CASCADE, "
-        "FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);");
+        "FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);"
+    );
 }
 
 void DatabaseManager::initDB() {
@@ -106,7 +116,7 @@ void DatabaseManager::initDB() {
         "key TEXT PRIMARY KEY, "
         "value TEXT);");
     
-    _db.exec("INSERT OR IGNORE INTO metadata (key, value) VALUES ('db_version', '2');");
+    _db.exec("INSERT OR IGNORE INTO metadata (key, value) VALUES ('db_version', '3');");
 }
 
 int DatabaseManager::checkVersion() {
@@ -124,7 +134,7 @@ int DatabaseManager::checkVersion() {
     return 0;
 }
 
-void DatabaseManager::from_v1_to_v2() {
+void DatabaseManager::v1_to_v2() {
     createAlbums("albums_temp");
     createPlaylists("playlists_temp");
 
@@ -146,4 +156,38 @@ void DatabaseManager::from_v1_to_v2() {
 
     _db.exec("UPDATE metadata SET value = '2' WHERE key = 'db_version';");
 
+}
+
+void DatabaseManager::v2_to_v3() {
+    createSongs("songs_temp");
+    createSongsMeta("songs_meta_temp");
+    createLyrics("lyrics_temp");
+    createPlaylistSongs("playlist_songs_temp");
+
+    _db.exec("INSERT INTO songs_temp " 
+        "SELECT * FROM songs");
+
+    _db.exec("INSERT INTO songs_meta_temp " 
+        "SELECT * FROM songs_meta");
+
+    _db.exec("INSERT INTO lyrics_temp " 
+        "SELECT * FROM lyrics");
+
+    _db.exec("INSERT INTO playlist_songs_temp " 
+        "SELECT * FROM playlist_songs");
+
+
+    _db.exec("DROP TABLE songs; " 
+        "ALTER TABLE songs_temp RENAME to songs;");
+        
+    _db.exec("DROP TABLE songs_meta; " 
+        "ALTER TABLE songs_meta_temp RENAME to songs_meta;");
+
+    _db.exec("DROP TABLE lyrics; " 
+        "ALTER TABLE lyrics_temp RENAME to lyrics;");
+
+    _db.exec("DROP TABLE playlist_songs; " 
+        "ALTER TABLE playlist_songs_temp RENAME to playlist_songs;");
+
+    _db.exec("UPDATE metadata SET value = '3' WHERE key = 'db_version';");
 }

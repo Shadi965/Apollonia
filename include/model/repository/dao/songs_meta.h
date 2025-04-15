@@ -11,7 +11,7 @@
 
 
 // CREATE TABLE IF NOT EXISTS songs_meta (
-//     song_id INTEGER, 
+//     song_id INTEGER UNIQUE NOT NULL, 
 //     duration INTEGER, 
 //     bitrate INTEGER, 
 //     channels INTEGER, 

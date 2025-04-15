@@ -14,6 +14,11 @@ public:
     SongNotFoundException(const int id)
         : std::runtime_error("Song with ID " + std::to_string(id) + " not found."), songId(id) {}
 };
+
+class SongAlreadyExists : public std::runtime_error {
+public:
+    SongAlreadyExists() : std::runtime_error("A song with these parameters is already in the table") {}
+};
     
 
 // class NoSongsException : public std::runtime_error {

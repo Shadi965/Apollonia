@@ -85,6 +85,10 @@ TEST_F(SongDaoTest, InsertSong) {
     q2.bind(1, songId);
     q2.executeStep();
     EXPECT_EQ(q2.getColumn(4).getInt(), song.album_id);
+
+    ASSERT_THROW(songDao.insertSong({0, "", "", "", 1, 1, 1, "", "", ""}), SongAlreadyExists);
+    ASSERT_NO_THROW(songDao.insertSong({0, "", "", "", 1, 2, 1, "", "", ""}));
+    ASSERT_NO_THROW(songDao.insertSong({0, "", "", "", 1, 1, 2, "", "", ""}));
 }
 TEST_F(SongDaoTest, DeleteSong) {
     EXPECT_FALSE(songDao.deleteSongById(1));
