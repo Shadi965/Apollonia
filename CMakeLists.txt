@@ -57,11 +57,13 @@ target_link_libraries(Apollonia dao pthread)
 
 enable_testing()
 
-add_executable(db_tests tests/test_db_manager.cpp
+add_executable(db_tests 
+                        tests/test_db_manager.cpp
                         tests/test_album_dao.cpp
+                        tests/test_song_dao.cpp
                         src/model/repository/db_manager.cpp)
 
-target_link_libraries(db_tests dao SQLiteCpp gtest gtest_main)
+target_link_libraries(db_tests dao SQLiteCpp gtest gtest_main pthread)
 
 add_test(NAME db_tests COMMAND db_tests)
 

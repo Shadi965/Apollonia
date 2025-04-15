@@ -1,3 +1,5 @@
+#include <sqlite3.h>
+
 #include "songs.h"
 
 SongDao::SongDao(SQLite::Database& db): _db(db) {};
@@ -49,21 +51,29 @@ SongEntity SongDao::getSongById(int songId) const {
 }
 
 int SongDao::insertSong(const SongEntity& song) {
-    // TODO: Нужно доработать базу и задать уникальную связь (например для title, artist и album_id)
     SQLite::Statement query(_db, 
         "INSERT INTO songs (title, artist, composer, album_id, track, disc, date, copyright, genre) "
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     query.bind(1, song.title);
     query.bind(2, song.artist);
     query.bind(3, song.composer);
-    query.bind(4, song.album_id);
+    
+    song.album_id == 0 ? query.bind(4) : query.bind(4, song.album_id);
+
     query.bind(5, song.track);
     query.bind(6, song.disc);
     query.bind(7, song.date);
     query.bind(8, song.copyright);
     query.bind(9, song.genre);
 
-    query.executeStep();
+    try {
+        query.executeStep();
+    }
+    catch(const SQLite::Exception& e) {
+        if (e.getExtendedErrorCode() == SQLITE_CONSTRAINT_FOREIGNKEY)
+            throw AlbumNotFoundException(song.album_id);
+        throw e;
+    }
     
     return _db.getLastInsertRowid();
 }
@@ -80,7 +90,7 @@ std::string SongDao::getNewestSongDateInAlbum(int albumId) const {
     query.bind(1, albumId);
 
     if (!query.executeStep())
-        throw AlbumNotFoundException(albumId);
+        return "";
 
     return query.getColumn(0).getString();
 }
@@ -91,7 +101,7 @@ std::string SongDao::getMostFrequentGenreInAlbum(int albumId) const {
     query.bind(1, albumId);
 
     if (!query.executeStep())
-        throw AlbumNotFoundException(albumId);
+        return "";
 
     return query.getColumn(0).getString();
 }
