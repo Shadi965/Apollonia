@@ -1,3 +1,5 @@
+#include <sqlite3.h>
+
 #include "songs_meta.h"
 
 SongMetaDao::SongMetaDao(SQLite::Database& db): _db(db) {};
@@ -58,7 +60,6 @@ std::string SongMetaDao::getFilePathBySongId(int songId) const {
 
 
 bool SongMetaDao::insertSongData(const SongMetaEntity& meta) {
-    // TODO: Возможна ошибка из-за передачи несуществующего song_id
     SQLite::Statement query(_db, 
         "INSERT INTO songs_meta (song_id, duration, bitrate, channels, sample_rate, last_modified, file) "
         "VALUES (?, ?, ?, ?, ?, ?, ?);"
@@ -71,7 +72,15 @@ bool SongMetaDao::insertSongData(const SongMetaEntity& meta) {
     query.bind(6, meta.last_modified);
     query.bind(7, meta.file);
 
-    query.executeStep();
-
+    try {
+        query.executeStep();
+    }
+    catch(const SQLite::Exception& e) {
+        if (e.getExtendedErrorCode() == SQLITE_CONSTRAINT_UNIQUE || 
+            e.getExtendedErrorCode() == SQLITE_CONSTRAINT_FOREIGNKEY)
+            return 0;
+        throw e;
+    }
+    
     return _db.getChanges() != 0;
 }
