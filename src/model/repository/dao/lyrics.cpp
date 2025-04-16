@@ -32,7 +32,7 @@ bool LyricsDao::addLyricLine(int songId, int timeMs, const std::string& line) {
     catch(const SQLite::Exception& e) {
         if (e.getExtendedErrorCode() == SQLITE_CONSTRAINT_UNIQUE || 
             e.getExtendedErrorCode() == SQLITE_CONSTRAINT_FOREIGNKEY)
-            return 0;
+            return false;
         throw e;
     }
     
