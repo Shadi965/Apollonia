@@ -48,6 +48,13 @@ target_link_libraries(dao
 add_executable(Apollonia ${PROJECT_SOURCES})
 target_link_libraries(Apollonia dao pthread)
 
+add_executable(db_initializer 
+    initer_src/fs.cpp
+    initer_src/main.cpp
+    src/model/repository/db_manager.cpp
+)
+target_link_libraries(db_initializer dao pthread avformat avutil)
+
 # add_custom_command(TARGET Apollonia PRE_BUILD
 #     COMMAND echo "Остановка контейнера"
 #     COMMAND docker-compose down

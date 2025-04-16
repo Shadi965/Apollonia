@@ -125,3 +125,16 @@ std::vector<SongEntity> SongDao::getTitleArtistAlbumTuples() const {
 
     return tuples;
 }
+std::vector<int> SongDao::getSongsFromAlbum(int albumId) const {
+    std::vector<int> songIds;
+
+    SQLite::Statement query(_db, "SELECT id FROM songs WHERE album_id = ? ORDER BY disc ASC, track ASC");
+
+    query.bind(1, albumId);
+
+    while (query.executeStep())
+        songIds.push_back(query.getColumn(0).getInt());
+
+    return songIds;
+}
+

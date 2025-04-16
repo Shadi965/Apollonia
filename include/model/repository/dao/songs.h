@@ -35,6 +35,7 @@ public:
     std::string getNewestSongDateInAlbum(int albumId) const;
     std::string getMostFrequentGenreInAlbum(int albumId) const;
     std::vector<SongEntity> getTitleArtistAlbumTuples() const;
+    std::vector<int> getSongsFromAlbum(int albumId) const;
 
     int insertSong(const SongEntity& song);
     bool deleteSongById(int songId);

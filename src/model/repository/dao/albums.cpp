@@ -126,3 +126,12 @@ bool AlbumDao::updateAlbumCoverPath(int id, const std::string& coverPath) {
 
     return _db.getChanges() != 0;
 }
+bool AlbumDao::updateAlbumTrackCount(int id, int trackCount) {
+    SQLite::Statement query(_db, "UPDATE albums SET track_count = ? WHERE id = ?");
+    query.bind(1, trackCount);
+    query.bind(2, id);
+
+    query.executeStep();
+
+    return _db.getChanges() != 0;
+}
