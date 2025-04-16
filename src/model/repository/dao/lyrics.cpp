@@ -1,3 +1,5 @@
+#include <sqlite3.h>
+
 #include "lyrics.h"
 
 LyricsDao::LyricsDao(SQLite::Database& db) : _db(db) {}
@@ -19,13 +21,20 @@ std::vector<LyricLineEntity> LyricsDao::getLyricsForSong(int songId) const {
 }
 
 bool LyricsDao::addLyricLine(int songId, int timeMs, const std::string& line) {
-    
-    // TODO: Возможно исключение из-за несуществующего song_id
     SQLite::Statement query(_db, "INSERT INTO lyrics (song_id, time_ms, line) VALUES (?, ?, ?)");
     query.bind(1, songId);
     query.bind(2, timeMs);
     query.bind(3, line);
-    query.executeStep();
 
+    try {
+        query.executeStep();
+    }
+    catch(const SQLite::Exception& e) {
+        if (e.getExtendedErrorCode() == SQLITE_CONSTRAINT_UNIQUE || 
+            e.getExtendedErrorCode() == SQLITE_CONSTRAINT_FOREIGNKEY)
+            return 0;
+        throw e;
+    }
+    
     return _db.getChanges() != 0;
 }
