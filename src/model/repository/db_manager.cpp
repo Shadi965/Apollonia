@@ -95,7 +95,6 @@ void DatabaseManager::createPlaylistSongs(const std::string& tableName = "playli
     _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "playlist_id INTEGER NOT NULL, "
         "song_id INTEGER NOT NULL, "
-        "UNIQUE (playlist_id, song_id), "
         "PRIMARY KEY(playlist_id, song_id), "
         "FOREIGN KEY(playlist_id) REFERENCES playlists(id) ON DELETE CASCADE, "
         "FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);"
@@ -162,32 +161,23 @@ void DatabaseManager::v2_to_v3() {
     createSongs("songs_temp");
     createSongsMeta("songs_meta_temp");
     createLyrics("lyrics_temp");
-    createPlaylistSongs("playlist_songs_temp");
 
+    
     _db.exec("INSERT INTO songs_temp " 
         "SELECT * FROM songs");
-
     _db.exec("INSERT INTO songs_meta_temp " 
         "SELECT * FROM songs_meta");
-
     _db.exec("INSERT INTO lyrics_temp " 
         "SELECT * FROM lyrics");
 
-    _db.exec("INSERT INTO playlist_songs_temp " 
-        "SELECT * FROM playlist_songs");
-
-
+        
     _db.exec("DROP TABLE songs; " 
         "ALTER TABLE songs_temp RENAME to songs;");
-        
     _db.exec("DROP TABLE songs_meta; " 
         "ALTER TABLE songs_meta_temp RENAME to songs_meta;");
-
     _db.exec("DROP TABLE lyrics; " 
         "ALTER TABLE lyrics_temp RENAME to lyrics;");
 
-    _db.exec("DROP TABLE playlist_songs; " 
-        "ALTER TABLE playlist_songs_temp RENAME to playlist_songs;");
-
+        
     _db.exec("UPDATE metadata SET value = '3' WHERE key = 'db_version';");
 }
