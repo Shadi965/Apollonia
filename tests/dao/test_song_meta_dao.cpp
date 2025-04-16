@@ -1,11 +1,10 @@
 #include <gtest/gtest.h>
 #include <SQLiteCpp/SQLiteCpp.h>
-#include <filesystem>
 
 #include "db_manager.h"
 #include "songs_meta.h"
 
-#define DB_NAME "test_song_meta_dao.db"
+#define DB_NAME ":memory:"
 
 class SongMetaDaoTest : public ::testing::Test {
 protected:
@@ -27,11 +26,6 @@ protected:
     void TearDown() override {
         db.exec("DELETE FROM songs_meta; VACUUM;");
         db.exec("UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'songs_meta';");
-    }
-
-    static void TearDownTestSuite() {
-        if (std::filesystem::exists(DB_NAME))
-            std::filesystem::remove(DB_NAME);
     }
 
     static bool compareSongMetas(const SongMetaEntity& first, const SongMetaEntity& second) {
@@ -150,7 +144,7 @@ TEST_F(SongMetaDaoTest, GetFilePathBySongId) {
     ASSERT_THROW(songMetaDao.getFilePathBySongId(5), SongNotFoundException);
 }
 
-TEST_F(SongMetaDaoTest, OnDeleteCascade) {    
+TEST_F(SongMetaDaoTest, OnDeleteCascade) {
     songMetaDao.insertSongData({1, 15, 16, 1, 4, 1, "/file"});
     songMetaDao.insertSongData({2, 15, 16, 1, 4, 1, "/file2"});
 

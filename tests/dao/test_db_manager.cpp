@@ -1,20 +1,13 @@
 #include <gtest/gtest.h>
-#include <filesystem>
 #include <SQLiteCpp/SQLiteCpp.h>
 
 #include "db_manager.h"
 
-#define DB_NAME "test_db_manager.db"
+#define DB_NAME ":memory:"
 
 class DatabaseManagerTest : public ::testing::Test {
 protected:
     std::string testDbPath = DB_NAME;
-
-    void TearDown() override {
-        if (std::filesystem::exists(testDbPath))
-            std::filesystem::remove(testDbPath);
-    }
-
     
     static bool hasColumn(SQLite::Database& db, const std::string& table, const std::string& column) {
         SQLite::Statement query(db, "PRAGMA table_info(" + table + ");");

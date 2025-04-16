@@ -1,11 +1,10 @@
 #include <gtest/gtest.h>
 #include <SQLiteCpp/SQLiteCpp.h>
-#include <filesystem>
 
 #include "db_manager.h"
 #include "songs.h"
 
-#define DB_NAME "test_song_dao.db"
+#define DB_NAME ":memory:"
 
 class SongDaoTest : public ::testing::Test {
 protected:
@@ -21,11 +20,6 @@ protected:
     void TearDown() override {
         db.exec("DELETE FROM songs; VACUUM;");
         db.exec("UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'songs';");
-    }
-
-    static void TearDownTestSuite() {
-        if (std::filesystem::exists(DB_NAME))
-            std::filesystem::remove(DB_NAME);
     }
 
     static bool compareSongs(const SongEntity& first, const SongEntity& second) {
