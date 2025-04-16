@@ -35,15 +35,15 @@ std::string PlaylistDao::getPlaylistCoverPathById(int id) const {
     query.bind(1, id);
 
     if (!query.executeStep()) 
-        return "";
+        throw PlaylistNotFoundException(id);
 
     return query.getColumn(0).getString();
 }
 
 int PlaylistDao::insertPlaylist(const PlaylistEntity& playlist) {
-    // TODO: Плейлисты могут выглядеть одинаково, но надо придумать защиту от случайных повторных запросов
-    SQLite::Statement query(_db, "INSERT INTO playlists(name) VALUES (?)");
+    SQLite::Statement query(_db, "INSERT INTO playlists(name, cover_path) VALUES (?, ?)");
     query.bind(1, playlist.name);
+    playlist.cover_path.empty() ? query.bind(2): query.bind(2, playlist.cover_path);
 
     query.executeStep();
 
