@@ -188,3 +188,22 @@ TEST_F(SongDaoTest, GetTitleArtistAlbumTuples) {
         EXPECT_EQ(songs[i].album_id, s[i].album_id);
     }   
 }
+TEST_F(SongDaoTest, GetSongsFromAlbum) {
+    std::vector<int> songs = songDao.getSongsFromAlbum(1);
+    EXPECT_EQ(songs.size(), 0);
+
+    SongEntity song1 = {0, "Test Song1", "Test Artist", "Test Composer", 0, 1, 1, "2025-04-13", "Test Copyright", "Test Genre"};
+    SongEntity song2 = {0, "Test Song2", "Test Artist2", "Test Composer", 1, 1, 1, "2025-04-13", "Test Copyright", "Test Genre"};
+    SongEntity song3 = {0, "Test Song3", "Test Artist2", "Test Composer", 1, 2, 1, "2025-04-13", "Test Copyright", "Test Genre"};
+
+
+    song1.id = songDao.insertSong(song1);
+    song2.id = songDao.insertSong(song2);
+    song3.id = songDao.insertSong(song3);
+    
+    songs = songDao.getSongsFromAlbum(1);
+    
+    ASSERT_EQ(songs.size(), 2);
+    EXPECT_EQ(songs[0], 2);
+    EXPECT_EQ(songs[1], 3);
+}

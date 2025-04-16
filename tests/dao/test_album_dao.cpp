@@ -178,7 +178,6 @@ TEST_F(AlbumDaoTest, GetAlbumCoverPathById) {
     ASSERT_THROW(albumDao.getAlbumCoverPathById(2), AlbumNotFoundException);
 }
 
-
 TEST_F(AlbumDaoTest, UpdateAlbumDateAndGenre) {
     AlbumEntity album = {0, "Test Album", "Test Artist", 10, 1, false, "2025-04-13", "Test Copyright", "Test Genre", ""};
     int albumId = albumDao.insertAlbum(album);
@@ -202,4 +201,14 @@ TEST_F(AlbumDaoTest, UpdateAlbumCoverPath) {
 
     AlbumEntity updatedAlbum = albumDao.getAlbumById(albumId);
     EXPECT_EQ(updatedAlbum.cover_path, newCoverPath);
+}
+TEST_F(AlbumDaoTest, UpdateAlbumTrackCount) {
+    AlbumEntity album = {0, "Test Album", "Test Artist", 10, 1, false, "2025-04-13", "Test Copyright", "Test Genre", ""};
+    int albumId = albumDao.insertAlbum(album);
+
+    int newTrackCount = 14;
+    ASSERT_TRUE(albumDao.updateAlbumTrackCount(albumId, newTrackCount));
+
+    AlbumEntity updatedAlbum = albumDao.getAlbumById(albumId);
+    EXPECT_EQ(updatedAlbum.track_count, newTrackCount);
 }
