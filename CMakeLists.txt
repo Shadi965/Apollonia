@@ -64,6 +64,7 @@ add_executable(db_tests
                         tests/test_song_meta_dao.cpp
                         tests/test_lyrics_dao.cpp
                         tests/test_playlist_dao.cpp
+                        tests/test_playlist_song_dao.cpp
                         src/model/repository/db_manager.cpp)
 
 target_link_libraries(db_tests dao SQLiteCpp gtest gtest_main pthread)

@@ -1,3 +1,5 @@
+#include <sqlite3.h>
+
 #include "playlist_songs.h"
 
 PlaylistSongDao::PlaylistSongDao(SQLite::Database& db) : _db(db) {}
@@ -15,11 +17,20 @@ std::vector<int> PlaylistSongDao::getSongsInPlaylist(int playlistId) const {
 }
 
 bool PlaylistSongDao::addSongToPlaylist(int playlistId, int songId) {
-    // TODO: Возможно исключение при несуществующих playlist_id или song_id
     SQLite::Statement query(_db, "INSERT INTO playlist_songs (playlist_id, song_id) VALUES (?, ?)");
     query.bind(1, playlistId);
     query.bind(2, songId);
-    query.executeStep();
+
+    try {
+        query.executeStep();
+    }
+    catch(const SQLite::Exception& e) {
+        if (e.getExtendedErrorCode() == SQLITE_CONSTRAINT_PRIMARYKEY || 
+            e.getExtendedErrorCode() == SQLITE_CONSTRAINT_FOREIGNKEY)
+            return false;
+        throw e;
+    }
+
     return _db.getChanges() != 0;
 }
 bool PlaylistSongDao::removeSongFromPlaylist(int playlistId, int songId) {
