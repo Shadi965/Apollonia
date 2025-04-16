@@ -31,7 +31,6 @@ public:
 
     virtual const FileData dloadAlbumCover(int id) const = 0;
     virtual bool uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) = 0;
-    // virtual const std::string getAlbumCoverFileName(int id) const = 0;
 
 };
 
