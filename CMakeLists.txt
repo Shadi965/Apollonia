@@ -4,9 +4,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 
-
-
-
 set(DAO_PATH src/model/repository/dao/)
 set(DAO_SOURCES ${DAO_PATH}/albums.cpp
     ${DAO_PATH}/lyrics.cpp
@@ -55,16 +52,6 @@ add_executable(db_initializer
 )
 target_link_libraries(db_initializer dao pthread avformat avutil)
 
-# add_custom_command(TARGET Apollonia PRE_BUILD
-#     COMMAND echo "Остановка контейнера"
-#     COMMAND docker-compose down
-# )
-
-# add_custom_command(TARGET Apollonia POST_BUILD
-#     COMMAND echo "Запуск контейнера с сервером"
-#     COMMAND docker-compose up -d
-# )
-
 enable_testing()
 
 add_executable(db_tests 
@@ -81,33 +68,3 @@ add_executable(db_tests
 target_link_libraries(db_tests dao SQLiteCpp gtest gtest_main pthread)
 
 add_test(NAME db_tests COMMAND db_tests)
-
-# target_link_libraries(Apollonia
-#                       SQLiteCpp
-#                       sqlite3
-#                       avformat
-#                       avutil
-#                       pthread
-#                       dl
-#                       tag
-#                       z)
-
-
-# add_library(fs src/model/file_service.cpp)
-# target_link_libraries(fs
-#                       avformat
-#                       avutil
-#                       pthread
-#                       )
-
-
-# add_library(db_manager src/model/repository/db_manager.cpp)
-# target_link_libraries(db_manager SQLiteCpp pthread)
-
-
-# add_library(apollo_repos src/model/repository/song_repository.cpp)
-# target_link_libraries(apollo_repos dao)
-
-
-# add_library(apollo_presenter src/presenter/song_presenter.cpp)
-# target_link_libraries(apollo_presenter apollo_repos)
