@@ -11,7 +11,7 @@
 #include "db_manager.h"
 
 #define PORT 8080
-#define DB_PATH "./songs.db"
+#define DB_PATH "./apollo.db"
 #define COVER_PATH "./covers/"
 
 static void parseArguments(int argc, char* argv[], int& port, std::string& dbPath, std::string& coversFolder);
