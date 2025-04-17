@@ -3,8 +3,9 @@ services:
     image: apollo
     ports:
       - "80:80"
-      - "8080:8080"
+      # - "8080:8080"
     volumes:
-      - "/mnt/c:/mnt/c"
-      - ./apollo.db:/var/lib/Apollonia/apollo.db
+      - /mnt/c:/mnt/c
+      - /home/shadi/Apollo/apollo.db:/var/lib/Apollonia/apollo.db
+      - /home/shadi/Apollo/covers:/var/lib/Apollonia/covers
       # - ./build/Apollonia:/usr/local/bin/Apollonia
