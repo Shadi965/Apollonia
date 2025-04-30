@@ -1,5 +1,14 @@
 #include "routes.h"
 
+static std::string sgetParam(const crow::request& req, const std::string& name) {
+    char* param = req.url_params.get(name);
+    if (param)
+        return param;
+    return "";
+}
+
+
+
 RoutesManager::RoutesManager(uint16_t port) {
     app.port(port).multithreaded();
 }
