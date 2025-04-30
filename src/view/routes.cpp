@@ -311,7 +311,7 @@ crow::response RoutesManager::statusResponse(int code) {
 }
 
 crow::json::wvalue RoutesManager::songsJson(const std::vector<Song>& songs) {
-    crow::json::wvalue json(songs.size());
+    crow::json::wvalue json = crow::json::wvalue::list(songs.size());
 
     for (size_t i = 0; i < songs.size(); ++i) {
         json[i] = songsJson(songs[i]);
@@ -344,7 +344,7 @@ crow::json::wvalue RoutesManager::lyricsJson(const Lyrics& lyrics) {
     crow::json::wvalue json;
 
     json["song_id"] = lyrics.songId;
-    json["lyrics"] = crow::json::wvalue::list();
+    json["lyrics"] = crow::json::wvalue::list(lyrics.lrc.size());
     for (size_t i = 0; i < lyrics.lrc.size(); ++i) {
         json["lyrics"][i]["time"] = lyrics.lrc[i].first;
         json["lyrics"][i]["text"] = lyrics.lrc[i].second;
@@ -353,7 +353,7 @@ crow::json::wvalue RoutesManager::lyricsJson(const Lyrics& lyrics) {
 }
 
 crow::json::wvalue RoutesManager::albumsJson(const std::vector<Album>& albums) {
-    crow::json::wvalue json(albums.size());
+    crow::json::wvalue json = crow::json::wvalue::list(albums.size());
 
     for (size_t i = 0; i < albums.size(); ++i) {
         json[i] = albumsJson(albums[i]);
@@ -370,7 +370,7 @@ crow::json::wvalue RoutesManager::playlistsJson(const Playlist& playlist) {
 
     json["id"] = playlist.id;
     json["name"] = playlist.name;
-    json["songs_ids"] = crow::json::wvalue::list();
+    json["songs_ids"] = crow::json::wvalue::list(playlist.songIds.size());
 
     for (size_t i = 0; i < playlist.songIds.size(); ++i)
         json["songs_ids"][i] = playlist.songIds[i];
@@ -378,7 +378,7 @@ crow::json::wvalue RoutesManager::playlistsJson(const Playlist& playlist) {
     return json;
 }
 crow::json::wvalue RoutesManager::playlistsJson(const std::vector<Playlist>& playlists) {
-    crow::json::wvalue json(playlists.size());
+    crow::json::wvalue json = crow::json::wvalue::list(playlists.size());
 
     for (size_t i = 0; i < playlists.size(); ++i)
         json[i] = crow::json::wvalue(playlistsJson(playlists[i]));
