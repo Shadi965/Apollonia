@@ -8,4 +8,4 @@ services:
       - /mnt/c:/mnt/c
       - /home/shadi/Apollo/apollo.db:/var/lib/Apollonia/apollo.db
       - /home/shadi/Apollo/covers:/var/lib/Apollonia/covers
-      # - ./build/Apollonia:/usr/local/bin/Apollonia
+      - ./build/Apollonia:/usr/local/bin/Apollonia
