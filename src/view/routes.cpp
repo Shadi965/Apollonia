@@ -236,24 +236,20 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
 
     CROW_ROUTE(app, "/playlist/song/").methods(crow::HTTPMethod::POST)
     ([&pp](const crow::request& req) {
-        if (req.get_header_value("Content-Type") == "application/json") {
-            int playlistId = std::atoi(req.url_params.get("playlist_id"));
-            int songId = std::atoi(req.url_params.get("song_id"));
-            if (playlistId != 0 && songId != 0 && pp.addSongToPlaylist(playlistId, songId)) {
-                return statusResponse(200, "success");
-            }
+        int playlistId = std::atoi(req.url_params.get("playlist_id"));
+        int songId = std::atoi(req.url_params.get("song_id"));
+        if (playlistId != 0 && songId != 0 && pp.addSongToPlaylist(playlistId, songId)) {
+            return statusResponse(200, "success");
         }
         return statusResponse(404, "fail");
     });
 
     CROW_ROUTE(app, "/playlist/song/").methods(crow::HTTPMethod::DELETE)
     ([&pp](const crow::request& req) {
-        if (req.get_header_value("Content-Type") == "application/json") {
-            int playlistId = std::atoi(req.url_params.get("playlist_id"));
-            int songId = std::atoi(req.url_params.get("song_id"));
-            if (playlistId != 0 && songId != 0 && pp.removeSongFromPlaylist(playlistId, songId)) {
-                return statusResponse(200, "success");
-            }
+        int playlistId = std::atoi(req.url_params.get("playlist_id"));
+        int songId = std::atoi(req.url_params.get("song_id"));
+        if (playlistId != 0 && songId != 0 && pp.removeSongFromPlaylist(playlistId, songId)) {
+            return statusResponse(200, "success");
         }
         return statusResponse(404, "fail");
     });
