@@ -196,7 +196,8 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
 
     CROW_ROUTE(app, "/playlist/").methods(crow::HTTPMethod::POST)
     ([&pp](const crow::request& req){ 
-        std::string name = parseStrKey(req, "name");
+        
+        std::string name = sgetParam(req, "name");
 
         if (name.empty())
             return statusResponse(400, "fail", "Missing 'name' in request");
@@ -211,7 +212,7 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
 
     CROW_ROUTE(app, "/playlist/<int>").methods(crow::HTTPMethod::PATCH)
     ([&pp](const crow::request& req, int id){
-        std::string newName = parseStrKey(req, "name");
+        std::string newName = sgetParam(req, "name");
         
         if (newName.empty())
             return statusResponse(400, "fail", "Missing 'name' in request");
@@ -236,8 +237,8 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     CROW_ROUTE(app, "/playlist/song/").methods(crow::HTTPMethod::POST)
     ([&pp](const crow::request& req) {
         if (req.get_header_value("Content-Type") == "application/json") {
-            int playlistId = parseIntKey(req, "playlist_id");
-            int songId = parseIntKey(req, "song_id");
+            int playlistId = std::atoi(req.url_params.get("playlist_id"));
+            int songId = std::atoi(req.url_params.get("song_id"));
             if (playlistId != 0 && songId != 0 && pp.addSongToPlaylist(playlistId, songId)) {
                 return statusResponse(200, "success");
             }
@@ -248,8 +249,8 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     CROW_ROUTE(app, "/playlist/song/").methods(crow::HTTPMethod::DELETE)
     ([&pp](const crow::request& req) {
         if (req.get_header_value("Content-Type") == "application/json") {
-            int playlistId = parseIntKey(req, "playlist_id");
-            int songId = parseIntKey(req, "song_id");
+            int playlistId = std::atoi(req.url_params.get("playlist_id"));
+            int songId = std::atoi(req.url_params.get("song_id"));
             if (playlistId != 0 && songId != 0 && pp.removeSongFromPlaylist(playlistId, songId)) {
                 return statusResponse(200, "success");
             }
