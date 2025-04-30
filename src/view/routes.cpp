@@ -204,10 +204,7 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
         
         int newId = pp.createPlaylist(name);
 
-        crow::json::wvalue result;
-        result["status"] = "success";
-        result["id"] = newId;
-        return crow::response(201, result);
+        return statusResponse(200, "success", playlistsJson(pp.getPlaylist(newId)), "data");
     });
 
     CROW_ROUTE(app, "/playlist/<int>").methods(crow::HTTPMethod::PATCH)
@@ -220,10 +217,7 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
         if (!pp.renamePlaylist(id, newName))
             return statusResponse(404, "fail", "Playlist not found");
 
-        crow::json::wvalue result;
-        result["status"] = "success";
-
-        return crow::response(200, result);
+        return statusResponse(200, "success");
     });
 
     CROW_ROUTE(app, "/playlist/<int>").methods(crow::HTTPMethod::DELETE)
