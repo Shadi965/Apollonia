@@ -34,12 +34,12 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
     };
 
     CROW_ROUTE(app, "/songs/")([&sp]() {
-        return statusResponse(200, "success", songsJson(sp.getAllSongs()), "songs");
+        return statusResponse(200, "success", songsJson(sp.getAllSongs()), "data");
     });
     
     CROW_ROUTE(app, "/song/<int>")([&sp](int id) {
         try {
-            return crow::response(200, songsJson(sp.getSong(id)));
+            return statusResponse(200, "success", songsJson(sp.getSong(id)), "data");
         }
         catch(const SongNotFoundException& e) {
             return statusResponse(404, "fail", e.what());
@@ -47,7 +47,7 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
     });
 
     CROW_ROUTE(app, "/lyrics/<int>")([&sp](int id) {
-        return statusResponse(200, "success", lyricsJson(sp.getSongLyrics(id)), "lyrics");
+        return statusResponse(200, "success", lyricsJson(sp.getSongLyrics(id)), "data");
     });
 
     CROW_ROUTE(app, "/stream/<int>")([&sp](const crow::request& req, int id) {
@@ -125,12 +125,12 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
 
 void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
     CROW_ROUTE(app, "/albums/")([&ap](){
-        return statusResponse(200, "success", albumsJson(ap.getAllAlbums()), "albums");
+        return statusResponse(200, "success", albumsJson(ap.getAllAlbums()), "data");
     });
 
     CROW_ROUTE(app, "/album/<int>")([&ap](int id){
         try {
-            return crow::response(200, albumsJson(ap.getAlbum(id)));
+            return statusResponse(200, "success", albumsJson(ap.getAlbum(id)), "data");
         }
         catch(const AlbumNotFoundException& e) {
             return statusResponse(404, "fail", e.what());
@@ -173,12 +173,12 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
 
 void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     CROW_ROUTE(app, "/playlists/")([&pp](){
-        return statusResponse(200, "success", playlistsJson(pp.getAllPlaylists()), "playlists");
+        return statusResponse(200, "success", playlistsJson(pp.getAllPlaylists()), "data");
     });
 
     CROW_ROUTE(app, "/playlist/<int>")([&pp](int id){
         try {
-            return statusResponse(200, "success", playlistsJson(pp.getPlaylist(id)), "");
+            return statusResponse(200, "success", playlistsJson(pp.getPlaylist(id)), "data");
     }
         catch(const PlaylistNotFoundException& e) {
             return statusResponse(404, "fail", e.what());
@@ -314,32 +314,37 @@ crow::json::wvalue RoutesManager::songsJson(const std::vector<Song>& songs) {
     crow::json::wvalue json(songs.size());
 
     for (size_t i = 0; i < songs.size(); ++i) {
-        json[i]["id"] = songs[i].id;
-        json[i]["title"] = songs[i].title;
-        json[i]["artist"] = songs[i].artist;
-        json[i]["composer"] = songs[i].composer;
-        json[i]["album_id"] = songs[i].albumId;
-        json[i]["track"] = songs[i].track;
-        json[i]["disc"] = songs[i].disc;
-        json[i]["date"] = songs[i].date;
-        json[i]["copyright"] = songs[i].copyright;
-        json[i]["genre"] = songs[i].genre;
-        json[i]["duration"] = songs[i].duration;
-        json[i]["bitrate"] = songs[i].bitrate;
-        json[i]["channels"] = songs[i].channels;
-        json[i]["sample_rate"] = songs[i].sampleRate;
+        json[i] = songsJson(songs[i]);
     }
 
     return json;
 }
 crow::json::wvalue RoutesManager::songsJson(const Song& song) {
-    return songsJson(std::vector<Song>{song});
+    crow::json::wvalue json;
+
+    json["id"] = song.id;
+    json["title"] = song.title;
+    json["artist"] = song.artist;
+    json["composer"] = song.composer;
+    json["album_id"] = song.albumId;
+    json["track"] = song.track;
+    json["disc"] = song.disc;
+    json["date"] = song.date;
+    json["copyright"] = song.copyright;
+    json["genre"] = song.genre;
+    json["duration"] = song.duration;
+    json["bitrate"] = song.bitrate;
+    json["channels"] = song.channels;
+    json["sample_rate"] = song.sampleRate;
+
+    return json;
 }
 
 crow::json::wvalue RoutesManager::lyricsJson(const Lyrics& lyrics) {
     crow::json::wvalue json;
 
     json["song_id"] = lyrics.songId;
+    json["lyrics"] = crow::json::wvalue::list();
     for (size_t i = 0; i < lyrics.lrc.size(); ++i) {
         json["lyrics"][i]["time"] = lyrics.lrc[i].first;
         json["lyrics"][i]["text"] = lyrics.lrc[i].second;
@@ -351,15 +356,7 @@ crow::json::wvalue RoutesManager::albumsJson(const std::vector<Album>& albums) {
     crow::json::wvalue json(albums.size());
 
     for (size_t i = 0; i < albums.size(); ++i) {
-        json[i]["id"] = albums[i].id;
-        json[i]["title"] = albums[i].title;
-        json[i]["artist"] = albums[i].artist;
-        json[i]["track_count"] = albums[i].trackCount;
-        json[i]["disc_count"] = albums[i].discCount;
-        json[i]["compilation"] = albums[i].compilation;
-        json[i]["date"] = albums[i].date;
-        json[i]["copyright"] = albums[i].copyright;
-        json[i]["genre"] = albums[i].genre;
+        json[i] = albumsJson(albums[i]);
     }
 
     return json;
@@ -373,6 +370,7 @@ crow::json::wvalue RoutesManager::playlistsJson(const Playlist& playlist) {
 
     json["id"] = playlist.id;
     json["name"] = playlist.name;
+    json["songs_ids"] = crow::json::wvalue::list();
 
     for (size_t i = 0; i < playlist.songIds.size(); ++i)
         json["songs_ids"][i] = playlist.songIds[i];
