@@ -364,7 +364,7 @@ crow::json::wvalue RoutesManager::albumsJson(const std::vector<Album>& albums) {
 
     return json;
 }
-crow::json::wvalue RoutesManager::albumsJson(const Album album) {
+crow::json::wvalue RoutesManager::albumsJson(const Album& album) {
     return albumsJson(std::vector<Album>{album});
 }
 

@@ -35,7 +35,7 @@ private:
     static crow::json::wvalue lyricsJson(const Lyrics& lyrics);
 
     static crow::json::wvalue albumsJson(const std::vector<Album>& albums);
-    static crow::json::wvalue albumsJson(const Album album);
+    static crow::json::wvalue albumsJson(const Album& album);
 
     static crow::json::wvalue playlistsJson(const Playlist& playlist);
     static crow::json::wvalue playlistsJson(const std::vector<Playlist>& playlists);
