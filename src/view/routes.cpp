@@ -372,7 +372,19 @@ crow::json::wvalue RoutesManager::albumsJson(const std::vector<Album>& albums) {
     return json;
 }
 crow::json::wvalue RoutesManager::albumsJson(const Album& album) {
-    return albumsJson(std::vector<Album>{album});
+    crow::json::wvalue json;
+
+    json["id"] = album.id;
+    json["title"] = album.title;
+    json["artist"] = album.artist;
+    json["track_count"] = album.trackCount;
+    json["disc_count"] = album.discCount;
+    json["compilation"] = album.compilation;
+    json["date"] = album.date;
+    json["copyright"] = album.copyright;
+    json["genre"] = album.genre;
+
+    return json;
 }
 
 crow::json::wvalue RoutesManager::playlistsJson(const Playlist& playlist) {
