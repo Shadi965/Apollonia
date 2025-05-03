@@ -67,7 +67,14 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         if (!rangeHeader.empty())
             sscanf(rangeHeader.c_str(), "bytes=%zu-%zu", &start, &end);
     
-        FileData chunk = sp.getFileChunk(id, start, end);
+        FileData chunk;
+        try {
+            chunk = sp.getFileChunk(id, start, end);
+        }
+        catch(const SongNotFoundException& e) {
+            return statusResponse(404, "fail", e.what());
+        }
+        
 
         std::string contentType;
         auto it = mediaTypes.find(chunk.extension);
@@ -101,7 +108,14 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         if (!rangeHeader.empty())
             sscanf(rangeHeader.c_str(), "bytes=%zu-%zu", &start, &end);
     
-        FileData chunk = sp.getFileChunk(id, start, end);
+        FileData chunk;
+
+        try {
+            chunk = sp.getFileChunk(id, start, end);
+        }
+        catch(const SongNotFoundException& e) {
+            return statusResponse(404, "fail", e.what());
+        }
     
         std::string contentType;
         auto it = mediaTypes.find(chunk.extension);
@@ -152,15 +166,25 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
         if (ext.empty())
             return statusResponse(415, "fail", "Expected image type");
         
-        if (ap.uploadAlbumCover(id, req.body.data(), req.body.size(), ext))
-                return statusResponse(200, "success");
+        try {
+            ap.uploadAlbumCover(id, req.body.data(), req.body.size(), ext);
+        }
+        catch(const AlbumNotFoundException& e) {
+            return statusResponse(404, "fail", e.what());
+        }
         
-        return statusResponse(500);
+        return statusResponse(200, "success");
     });
 
     CROW_ROUTE(app, "/album/cover/<int>").methods(crow::HTTPMethod::GET)
     ([&ap](int id) {
-        FileData data = ap.dloadAlbumCover(id);
+        FileData data;
+        try {
+            data = ap.dloadAlbumCover(id);
+        }
+        catch(const AlbumNotFoundException& e) {
+            return statusResponse(404, "fail", e.what());
+        }
         if (data.data.empty())
             return statusResponse(404, "fail", "Cover not found for this album");
         std::string type = imageTypeByExtension(data.extension);
@@ -188,7 +212,7 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     CROW_ROUTE(app, "/playlist/<int>")([&pp](int id){
         try {
             return statusResponse(200, "success", playlistsJson(pp.getPlaylist(id)), "data");
-    }
+        }
         catch(const PlaylistNotFoundException& e) {
             return statusResponse(404, "fail", e.what());
         }
@@ -254,15 +278,25 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
         if (ext.empty())
             return statusResponse(415, "fail", "Expected image type");
         
-        if (pp.uploadPlaylistCover(id, req.body.data(), req.body.size(), ext))
-                return statusResponse(200, "success");
+        try {
+            pp.uploadPlaylistCover(id, req.body.data(), req.body.size(), ext);
+        }
+        catch(const PlaylistNotFoundException& e) {
+            return statusResponse(404, "fail", e.what());
+        }
         
-        return statusResponse(500);
+        return statusResponse(200, "success");
     });
 
     CROW_ROUTE(app, "/playlist/cover/<int>").methods(crow::HTTPMethod::GET)
     ([&pp](int id) {
-        FileData data = pp.dloadPlaylistCover(id);
+        FileData data;
+        try {
+            data = pp.dloadPlaylistCover(id);
+        }
+        catch(const PlaylistNotFoundException& e) {
+            return statusResponse(404, "fail", e.what());
+        }
         if (data.data.empty())
             return statusResponse(404, "fail", "Cover not found for this playlist");
         std::string type = imageTypeByExtension(data.extension);
