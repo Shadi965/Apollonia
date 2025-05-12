@@ -107,9 +107,9 @@ TEST_F(PlaylistSongDaoTest, RemoveSongFromPlaylist) {
 }
 
 TEST_F(PlaylistSongDaoTest, GetSongsInPlaylist) {
-    std::vector<int> pSongs = pSongDao.getSongsInPlaylist(1);
+    std::vector<int> pSongs = pSongDao.getSongsFromPlaylist(1);
     ASSERT_EQ(pSongs.size(), 0);
-    pSongs = pSongDao.getSongsInPlaylist(5);
+    pSongs = pSongDao.getSongsFromPlaylist(5);
     ASSERT_EQ(pSongs.size(), 0);
 
     pSongDao.addSongToPlaylist(1, 1);
@@ -118,13 +118,13 @@ TEST_F(PlaylistSongDaoTest, GetSongsInPlaylist) {
     pSongDao.addSongToPlaylist(2, 2);
     pSongDao.addSongToPlaylist(2, 3);
 
-    pSongs = pSongDao.getSongsInPlaylist(1);
+    pSongs = pSongDao.getSongsFromPlaylist(1);
     ASSERT_EQ(pSongs.size(), 3);
     EXPECT_EQ(pSongs[0], 1);
     EXPECT_EQ(pSongs[1], 2);
     EXPECT_EQ(pSongs[2], 3);
 
-    pSongs = pSongDao.getSongsInPlaylist(2);
+    pSongs = pSongDao.getSongsFromPlaylist(2);
     ASSERT_EQ(pSongs.size(), 2);
     EXPECT_EQ(pSongs[0], 2);
     EXPECT_EQ(pSongs[1], 3);
@@ -137,14 +137,14 @@ TEST_F(PlaylistSongDaoTest, OnDeleteCascade) {
     pSongDao.addSongToPlaylist(2, 2);
     pSongDao.addSongToPlaylist(2, 3);
 
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(1).size(), 3);
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(2).size(), 2);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(1).size(), 3);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(2).size(), 2);
 
     db.exec("DELETE FROM songs WHERE id = 2");
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(1).size(), 2);
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(2).size(), 1);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(1).size(), 2);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(2).size(), 1);
 
     db.exec("DELETE FROM playlists WHERE id = 1");
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(1).size(), 0);
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(2).size(), 1);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(1).size(), 0);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(2).size(), 1);
 }

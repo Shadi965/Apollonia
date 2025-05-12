@@ -22,7 +22,7 @@ class PlaylistSongDao {
 public:
     PlaylistSongDao(SQLite::Database& db);
 
-    std::vector<int> getSongsInPlaylist(int playlistId) const;
+    std::vector<int> getSongsFromPlaylist(int playlistId) const;
 
     bool addSongToPlaylist(int playlistId, int songId);
     bool removeSongFromPlaylist(int playlistId, int songId);

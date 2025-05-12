@@ -50,7 +50,7 @@ PlaylistEntity ApolloRepository::getPlaylistById(int id) const {
 }
 
 std::vector<int> ApolloRepository::getPlaylistSongs(int id) const {
-    return _playlistSongDao.getSongsInPlaylist(id);
+    return _playlistSongDao.getSongsFromPlaylist(id);
 }
 
 int ApolloRepository::createPlaylist(const std::string name) {

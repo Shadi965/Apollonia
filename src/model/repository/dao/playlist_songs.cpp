@@ -4,7 +4,7 @@
 
 PlaylistSongDao::PlaylistSongDao(SQLite::Database& db) : _db(db) {}
 
-std::vector<int> PlaylistSongDao::getSongsInPlaylist(int playlistId) const {
+std::vector<int> PlaylistSongDao::getSongsFromPlaylist(int playlistId) const {
     std::vector<int> songIds;
     SQLite::Statement query(_db, "SELECT song_id FROM playlist_songs WHERE playlist_id = ?");
     query.bind(1, playlistId);
