@@ -34,6 +34,7 @@ public:
     const FileData dloadAlbumCover(int id) const override;
     bool uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) override;
 
+    const std::vector<int> getAlbumSongs(int albumId) const override;
 
 
 
@@ -50,6 +51,7 @@ public:
     const FileData dloadPlaylistCover(int id) const override;
     bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) override;
 
+    const std::vector<int> getPlaylistSongs(int playlistId) const override;
 private:
     ISongRepository& _sr;
     IAlbumRepository& _ar;
@@ -58,7 +60,7 @@ private:
 
     static Song toSong(const SongEntity& se, const SongMetaEntity& sme);
     static Album toAlbum(const AlbumEntity& ae);
-    static Playlist toPlaylist(const PlaylistEntity& pe, const std::vector<int>&& songs);
+    static Playlist toPlaylist(const PlaylistEntity& pe);
 };
 
 #endif // SONG_PRESENTER_H

@@ -67,6 +67,9 @@ bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsiz
     return _ar.updateAlbumCoverPath(id, path);
 }
 
+const std::vector<int> ApolloPresenter::getAlbumSongs(int albumId) const {
+    return _ar.getAlbumSongs(albumId);
+}
 
 
 const std::vector<Playlist> ApolloPresenter::getAllPlaylists() const {
@@ -75,14 +78,14 @@ const std::vector<Playlist> ApolloPresenter::getAllPlaylists() const {
     std::vector<Playlist> playlists;
     playlists.reserve(peList.size());
     for (auto &&pe : peList)
-        playlists.push_back(toPlaylist(pe, _pr.getPlaylistSongs(pe.id)));
+        playlists.push_back(toPlaylist(pe));
 
     return playlists;
 }
 const Playlist ApolloPresenter::getPlaylist(int id) const {
     PlaylistEntity pe = _pr.getPlaylistById(id);
     
-    return toPlaylist(pe, _pr.getPlaylistSongs(id));
+    return toPlaylist(pe);
 }
 int ApolloPresenter::createPlaylist(const std::string name) {
     return _pr.createPlaylist(name);
@@ -114,7 +117,9 @@ bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::stream
     return _pr.updatePlaylistCoverPath(id, path);
 }
 
-
+const std::vector<int> ApolloPresenter::getPlaylistSongs(int playlistId) const {
+    return _pr.getPlaylistSongs(playlistId);
+}
 
 
 Song ApolloPresenter::toSong(const SongEntity &se, const SongMetaEntity &sme) {
@@ -148,6 +153,6 @@ Album ApolloPresenter::toAlbum(const AlbumEntity &ae) {
         ae.genre
     };
 }
-Playlist ApolloPresenter::toPlaylist(const PlaylistEntity &pe, const std::vector<int>&& songs) {   
-    return {pe.id, pe.name, songs};
+Playlist ApolloPresenter::toPlaylist(const PlaylistEntity &pe) {   
+    return {pe.id, pe.name};
 }

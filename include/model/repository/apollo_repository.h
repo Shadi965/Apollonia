@@ -36,6 +36,7 @@ public:
     std::string getAlbumCoverPath(int id) const override;
     bool updateAlbumCoverPath(int id, const std::string& coverPath) override;
 
+    std::vector<int> getAlbumSongs(int id) const override;
 
 
 

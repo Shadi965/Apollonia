@@ -202,6 +202,14 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
         res.body = std::move(data.data);
         return res;
     });
+
+    CROW_ROUTE(app, "/album/<int>/songs/")([&ap](int id) {
+        std::vector<int> songs = ap.getAlbumSongs(id);
+        crow::json::wvalue json = crow::json::wvalue::list(songs.size());
+        for (size_t i = 0; i < songs.size(); ++i)
+            json[i] = songs[i];
+        return statusResponse(200, "success", json, "data");
+    });
 }
 
 void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
@@ -314,6 +322,14 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
         res.body = std::move(data.data);
         return res;
     });
+
+    CROW_ROUTE(app, "/playlist/<int>/songs/")([&pp](int id) {
+        std::vector<int> songs = pp.getPlaylistSongs(id);
+        crow::json::wvalue json = crow::json::wvalue::list(songs.size());
+        for (size_t i = 0; i < songs.size(); ++i)
+            json[i] = songs[i];
+        return statusResponse(200, "success", json, "data");
+    });
 }
 
 
@@ -416,10 +432,6 @@ crow::json::wvalue RoutesManager::playlistsJson(const Playlist& playlist) {
 
     json["id"] = playlist.id;
     json["name"] = playlist.name;
-    json["songs_ids"] = crow::json::wvalue::list(playlist.songIds.size());
-
-    for (size_t i = 0; i < playlist.songIds.size(); ++i)
-        json["songs_ids"][i] = playlist.songIds[i];
 
     return json;
 }

@@ -40,6 +40,9 @@ bool ApolloRepository::updateAlbumCoverPath(int id, const std::string& coverPath
     return _albumDao.updateAlbumCoverPath(id, coverPath);
 }
 
+std::vector<int> ApolloRepository::getAlbumSongs(int id) const {
+    return _albumDao.getSongsFromAlbum(id);
+}
 
 
 std::vector<PlaylistEntity> ApolloRepository::getAllPlaylists() const {

@@ -11,7 +11,6 @@
 struct Playlist {
     int id;
     std::string name;
-    std::vector<int> songIds;
 };
 
 class IPlaylistPresenter {
@@ -31,6 +30,8 @@ public:
 
     virtual const FileData dloadPlaylistCover(int id) const = 0;
     virtual bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) = 0;
+
+    virtual const std::vector<int> getPlaylistSongs(int playlistId) const = 0;
 };
 
 #endif // I_PLAYLIST_PRESENTER_H
