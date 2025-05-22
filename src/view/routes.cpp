@@ -264,7 +264,8 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     ([&pp](const crow::request& req) {
         int playlistId = std::atoi(req.url_params.get("playlist_id"));
         int songId = std::atoi(req.url_params.get("song_id"));
-        if (playlistId != 0 && songId != 0 && pp.addSongToPlaylist(playlistId, songId)) {
+        double position = std::atof(req.url_params.get("position"));
+        if (playlistId != 0 && songId != 0 && pp.addSongToPlaylist(playlistId, songId, position)) {
             return statusResponse(200, "success");
         }
         return statusResponse(404, "fail");
@@ -324,11 +325,23 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     });
 
     CROW_ROUTE(app, "/playlist/<int>/songs/")([&pp](int id) {
-        std::vector<int> songs = pp.getPlaylistSongs(id);
+        std::vector<std::pair<int, double>> songs = pp.getPlaylistSongs(id);
         crow::json::wvalue json = crow::json::wvalue::list(songs.size());
-        for (size_t i = 0; i < songs.size(); ++i)
-            json[i] = songs[i];
+        for (size_t i = 0; i < songs.size(); ++i){
+            json[i][0] = songs[i].first;
+            json[i][1] = songs[i].second;
+        }
         return statusResponse(200, "success", json, "data");
+    });
+
+    CROW_ROUTE(app, "/playlist/<int>/song/").methods(crow::HTTPMethod::PATCH)
+    ([&pp](const crow::request& req, int playlistId) {
+        int songId = std::atoi(req.url_params.get("song_id"));
+        double position = std::atof(req.url_params.get("position"));
+        if (pp.updateSongPosition(playlistId, songId, position)) {
+            return statusResponse(200, "success");
+        }
+        return statusResponse(404, "fail");
     });
 }
 

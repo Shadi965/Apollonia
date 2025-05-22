@@ -1,18 +1,18 @@
 #include "db_manager.h"
-
+#include "dao/playlist_songs.h"
 DatabaseManager::DatabaseManager(const std::string& dbPath) : _db(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
     _db.exec("PRAGMA foreign_keys = ON;");
-    switch (checkVersion())
+    switch (getDbVersion())
     {
     case 0:
         initDB();
         break;
     case 1:
         v1_to_v2();
-        v2_to_v3();
-        break;
     case 2:
         v2_to_v3();
+    case 3:
+        v3_to_v4();
         break;
     default:
         break;
@@ -95,7 +95,9 @@ void DatabaseManager::createPlaylistSongs(const std::string& tableName = "playli
     _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "playlist_id INTEGER NOT NULL, "
         "song_id INTEGER NOT NULL, "
+        "position REAL, "
         "PRIMARY KEY(playlist_id, song_id), "
+        "UNIQUE(playlist_id, position), "
         "FOREIGN KEY(playlist_id) REFERENCES playlists(id) ON DELETE CASCADE, "
         "FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);"
     );
@@ -115,10 +117,10 @@ void DatabaseManager::initDB() {
         "key TEXT PRIMARY KEY, "
         "value TEXT);");
     
-    _db.exec("INSERT OR IGNORE INTO metadata (key, value) VALUES ('db_version', '3');");
+    _db.exec("INSERT OR IGNORE INTO metadata (key, value) VALUES ('db_version', '4');");
 }
 
-int DatabaseManager::checkVersion() {
+int DatabaseManager::getDbVersion() {
     if (!_db.tableExists("metadata"))
         return 0;
     
@@ -180,4 +182,22 @@ void DatabaseManager::v2_to_v3() {
 
         
     _db.exec("UPDATE metadata SET value = '3' WHERE key = 'db_version';");
+}
+
+void DatabaseManager::v3_to_v4() {
+    PlaylistSongDao playlistSongDao(_db);
+    createPlaylistSongs("playlist_songs_temp");
+
+    _db.exec("INSERT INTO playlist_songs_temp " 
+        "SELECT playlist_id, song_id, NULL FROM playlist_songs");
+
+    _db.exec("DROP TABLE playlist_songs; " 
+        "ALTER TABLE playlist_songs_temp RENAME to playlist_songs;");
+
+    _db.exec("UPDATE metadata SET value = '4' WHERE key = 'db_version';");
+
+    SQLite::Statement query(_db, "SELECT id FROM playlists");
+    while (query.executeStep()) {
+        playlistSongDao.spreadOutPositions(query.getColumn(0).getInt());
+    }
 }

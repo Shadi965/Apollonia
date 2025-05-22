@@ -96,11 +96,27 @@ bool ApolloPresenter::renamePlaylist(int playlistId, const std::string newName) 
 bool ApolloPresenter::deletePlaylist(int playlistId) {
     return _pr.deletePlaylist(playlistId);
 }
-bool ApolloPresenter::addSongToPlaylist(int playlistId, int songId){
-    return _pr.addSongToPlaylist(playlistId, songId);
+bool ApolloPresenter::addSongToPlaylist(int playlistId, int songId, double position){
+    return _pr.addSongToPlaylist(playlistId, songId, position);
 }
 bool ApolloPresenter::removeSongFromPlaylist(int playlistId, int songId){
     return _pr.removeSongFromPlaylist(playlistId, songId);
+}
+bool ApolloPresenter::updateSongPosition(int playlistId, int songId, double position) {
+    return _pr.updateSongPosition(playlistId, songId, position);
+}
+
+std::vector<int> ApolloPresenter::addSongsToPlaylist(int playlistId, std::vector<std::pair<int, double>>& positionedSongs) {
+    std::vector<PlaylistSongEntity> psList;
+    for (auto &&[songId, position] : positionedSongs)
+        psList.push_back({playlistId, songId, position});
+    
+    std::vector<PlaylistSongEntity> notAdded = _pr.addSongsToPlaylist(psList);
+    std::vector<int> notAddedIds;
+    for (auto &&ps : notAdded)
+        notAddedIds.push_back(ps.song_id);
+    
+    return notAddedIds;
 }
 
 const FileData ApolloPresenter::dloadPlaylistCover(int id) const {
@@ -117,7 +133,7 @@ bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::stream
     return _pr.updatePlaylistCoverPath(id, path);
 }
 
-const std::vector<int> ApolloPresenter::getPlaylistSongs(int playlistId) const {
+const std::vector<std::pair<int, double>> ApolloPresenter::getPlaylistSongs(int playlistId) const {
     return _pr.getPlaylistSongs(playlistId);
 }
 

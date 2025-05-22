@@ -23,10 +23,11 @@ private:
     void createPlaylistSongs(const std::string& tableName);
 
     void initDB();
-    int checkVersion();
+    int getDbVersion();
 
     void v1_to_v2();
     void v2_to_v3();
+    void v3_to_v4();
 };
 
 

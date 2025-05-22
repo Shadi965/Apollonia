@@ -27,6 +27,7 @@ struct LyricLineEntity {
 struct PlaylistSongEntity {
     int playlist_id;
     int song_id;
+    double position;
 };
 
 struct PlaylistEntity {

@@ -162,6 +162,81 @@ protected:
 
         return db;
     }
+
+    static SQLite::Database createV3(const std::string& dbPath) {
+        SQLite::Database db(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+
+        db.exec("CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT);");
+        db.exec("INSERT INTO metadata (key, value) VALUES ('db_version', '3');");
+
+        db.exec("CREATE TABLE IF NOT EXISTS songs ("
+            "id INTEGER PRIMARY KEY, "
+            "title TEXT, "
+            "artist TEXT, "
+            "composer TEXT, "
+            "album_id INTEGER, "
+            "track INTEGER, "
+            "disc INTEGER, "
+            "date TEXT, "
+            "copyright TEXT, "
+            "genre TEXT, "
+            "UNIQUE(album_id, track, disc), "
+            "FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE SET NULL);"
+
+            "CREATE INDEX IF NOT EXISTS idx_songs_album_id ON songs(album_id);"
+        );
+
+        db.exec("CREATE TABLE IF NOT EXISTS songs_meta ("
+            "song_id INTEGER UNIQUE NOT NULL, "
+            "duration INTEGER, "
+            "bitrate INTEGER, "
+            "channels INTEGER, "
+            "sample_rate INTEGER, "
+            "last_modified INTEGER NOT NULL, "
+            "file TEXT UNIQUE, "
+            "FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE);"
+        );
+
+        db.exec("CREATE TABLE IF NOT EXISTS albums ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "title TEXT, "
+            "artist TEXT, "
+            "track_count INTEGER, "
+            "disc_count INTEGER, "
+            "compilation BOOLEAN DEFAULT FALSE, "
+            "date TEXT, "
+            "copyright TEXT, "
+            "genre TEXT, "
+            "cover_path TEXT, "
+            "UNIQUE (title, artist));"
+        );
+
+        db.exec("CREATE TABLE IF NOT EXISTS playlists ("
+            "id INTEGER PRIMARY KEY, "
+            "name TEXT, "
+            "cover_path TEXT);"
+        );
+
+        db.exec("CREATE TABLE IF NOT EXISTS lyrics ("
+        "song_id INTEGER NOT NULL, "
+        "time_ms INTEGER NOT NULL, "
+        "line TEXT NOT NULL, "
+        "UNIQUE (song_id, time_ms), "
+        "FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);"
+
+        "CREATE INDEX IF NOT EXISTS idx_lyrics_song_time ON lyrics(song_id, time_ms);"
+        );
+
+        db.exec("CREATE TABLE IF NOT EXISTS playlist_songs ("
+            "playlist_id INTEGER NOT NULL, "
+            "song_id INTEGER NOT NULL, "
+            "PRIMARY KEY(playlist_id, song_id), "
+            "FOREIGN KEY(playlist_id) REFERENCES playlists(id) ON DELETE CASCADE, "
+            "FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE);"
+        );
+
+        return db;
+    }
 };
 
 TEST_F(DatabaseManagerTest, DBIsCreatedAndInitialized) {
@@ -178,10 +253,10 @@ TEST_F(DatabaseManagerTest, DBIsCreatedAndInitialized) {
 
     SQLite::Statement query(db, "SELECT value FROM metadata WHERE key = 'db_version';");
     ASSERT_TRUE(query.executeStep());
-    EXPECT_EQ(query.getColumn(0).getText(), std::string("3"));
+    EXPECT_EQ(query.getColumn(0).getText(), std::string("4"));
 }
 
-TEST_F(DatabaseManagerTest, V1ToV3Upgrade) {
+TEST_F(DatabaseManagerTest, V1ToV4Upgrade) {
     SQLite::Database db = createV1(testDbPath);
 
     DatabaseManager dbManager(testDbPath);
@@ -196,13 +271,14 @@ TEST_F(DatabaseManagerTest, V1ToV3Upgrade) {
 
     SQLite::Statement versionQuery(newDb, "SELECT value FROM metadata WHERE key = 'db_version';");
     ASSERT_TRUE(versionQuery.executeStep());
-    EXPECT_EQ(versionQuery.getColumn(0).getText(), std::string("3"));
+    EXPECT_EQ(versionQuery.getColumn(0).getText(), std::string("4"));
 
     ASSERT_TRUE(hasColumn(newDb, "albums", "cover_path"));
     ASSERT_TRUE(hasColumn(newDb, "playlists", "cover_path"));
+    ASSERT_TRUE(hasColumn(newDb, "playlist_songs", "position"));
 }
 
-TEST_F(DatabaseManagerTest, V2ToV3Upgrade) {
+TEST_F(DatabaseManagerTest, V2ToV4Upgrade) {
     SQLite::Database db = createV2(testDbPath);
 
     DatabaseManager dbManager(testDbPath);
@@ -217,8 +293,29 @@ TEST_F(DatabaseManagerTest, V2ToV3Upgrade) {
 
     SQLite::Statement versionQuery(newDb, "SELECT value FROM metadata WHERE key = 'db_version';");
     ASSERT_TRUE(versionQuery.executeStep());
-    EXPECT_EQ(versionQuery.getColumn(0).getText(), std::string("3"));
+    EXPECT_EQ(versionQuery.getColumn(0).getText(), std::string("4"));
 
     ASSERT_TRUE(hasColumn(newDb, "albums", "cover_path"));
     ASSERT_TRUE(hasColumn(newDb, "playlists", "cover_path"));
+    ASSERT_TRUE(hasColumn(newDb, "playlist_songs", "position"));
+}
+
+TEST_F(DatabaseManagerTest, V3ToV4Upgrade) {
+    SQLite::Database db = createV3(testDbPath);
+
+    DatabaseManager dbManager(testDbPath);
+    SQLite::Database& newDb = dbManager.getDb();
+
+    ASSERT_TRUE(newDb.tableExists("albums"));
+    ASSERT_TRUE(newDb.tableExists("playlist_songs"));
+    ASSERT_TRUE(newDb.tableExists("lyrics"));
+    ASSERT_TRUE(newDb.tableExists("songs_meta"));
+    ASSERT_TRUE(newDb.tableExists("songs"));
+    ASSERT_TRUE(newDb.tableExists("playlists"));
+
+    SQLite::Statement versionQuery(newDb, "SELECT value FROM metadata WHERE key = 'db_version';");
+    ASSERT_TRUE(versionQuery.executeStep());
+    EXPECT_EQ(versionQuery.getColumn(0).getText(), std::string("4"));
+
+    ASSERT_TRUE(hasColumn(newDb, "playlist_songs", "position"));
 }

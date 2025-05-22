@@ -38,19 +38,19 @@ public:
 
     std::vector<int> getAlbumSongs(int id) const override;
 
-
-
     std::vector<PlaylistEntity> getAllPlaylists() const override;
     PlaylistEntity getPlaylistById(int id) const override;
 
-    std::vector<int> getPlaylistSongs(int id) const override;
+    std::vector<std::pair<int, double>> getPlaylistSongs(int id) const override;
 
     int createPlaylist(const std::string name) override;
     bool renamePlaylist(int playlistId, const std::string newName) override;
     bool deletePlaylist(int playlistId) override;
 
-    bool addSongToPlaylist(int playlistId, int songId) override;
+    bool addSongToPlaylist(int playlistId, int songId, double position) override;
     bool removeSongFromPlaylist(int playlistId, int songId) override;
+    bool updateSongPosition(int playlistId, int songId, double position) override;
+    std::vector<PlaylistSongEntity> addSongsToPlaylist(std::vector<PlaylistSongEntity>& songs) override;
 
     std::string getPlaylistCoverPath(int id) const override;
     bool updatePlaylistCoverPath(int id, const std::string& coverPath) override;

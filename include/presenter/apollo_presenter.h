@@ -45,13 +45,15 @@ public:
     bool renamePlaylist(int playlistId, const std::string newName) override;
     bool deletePlaylist(int playlistId) override;
 
-    bool addSongToPlaylist(int playlistId, int songId) override;
+    bool addSongToPlaylist(int playlistId, int songId, double position) override;
     bool removeSongFromPlaylist(int playlistId, int songId) override;
+    bool updateSongPosition(int playlistId, int songId, double position) override;
+    std::vector<int> addSongsToPlaylist(int playlistId, std::vector<std::pair<int, double>>& positionedSongs) override;
 
     const FileData dloadPlaylistCover(int id) const override;
     bool uploadPlaylistCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) override;
 
-    const std::vector<int> getPlaylistSongs(int playlistId) const override;
+    const std::vector<std::pair<int, double>> getPlaylistSongs(int playlistId) const override;
 private:
     ISongRepository& _sr;
     IAlbumRepository& _ar;
