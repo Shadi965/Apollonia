@@ -329,7 +329,7 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
         crow::json::wvalue json = crow::json::wvalue::list(songs.size());
         for (size_t i = 0; i < songs.size(); ++i){
             json[i][0] = songs[i].first;
-            json[i][1] = songs[i].second;
+            json[i][1] = std::to_string(songs[i].second);
         }
         return statusResponse(200, "success", json, "data");
     });
