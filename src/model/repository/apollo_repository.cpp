@@ -82,12 +82,17 @@ bool ApolloRepository::updateSongPosition(int playlistId, int songId, double pos
     return _playlistSongDao.updateSongPosition(playlistId, songId, position);
 }
 
+static bool needRecomposition(double position) {
+    double scaled = position * 1000.0;
+    return std::abs(scaled - (int)scaled) > 1.0e-3;
+}
+
 std::vector<PlaylistSongEntity> ApolloRepository::addSongsToPlaylist(std::vector<PlaylistSongEntity>& songs) {
     int playlistId = songs[0].playlist_id;
     std::vector<PlaylistSongEntity> notAdded;
     bool recomposition = false;
     for (auto& song : songs) {
-        if (!recomposition && (song.position - (int)song.position > 1.0e-6))
+        if (!recomposition && needRecomposition(song.position))
             recomposition = true;
         if (!_playlistSongDao.addSongToPlaylist(playlistId, song.song_id, song.position))
             notAdded.push_back(song);
