@@ -327,10 +327,14 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
     CROW_ROUTE(app, "/playlist/<int>/songs/")([&pp](int id) {
         std::vector<std::pair<int, double>> songs = pp.getPlaylistSongs(id);
         crow::json::wvalue json = crow::json::wvalue::list(songs.size());
+
         for (size_t i = 0; i < songs.size(); ++i){
-            json[i][0] = songs[i].first;
-            json[i][1] = std::to_string(songs[i].second);
+            crow::json::wvalue songJson;
+            songJson["song_id"] = songs[i].first;
+            songJson["position"] = songs[i].second;
+            json[i] = std::move(songJson);
         }
+
         return statusResponse(200, "success", json, "data");
     });
 
