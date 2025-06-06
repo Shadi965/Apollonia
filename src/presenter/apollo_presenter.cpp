@@ -53,13 +53,23 @@ const Album ApolloPresenter::getAlbum(int id) const {
     return toAlbum(_ar.getAlbumById(id));
 }
 
+
+static void sanitizeFilename(std::string& name) {
+    for (char& ch : name) {
+        if (ch == '/' || ch == '\\' || ch == '*' || ch == '?' || ch == '"' ||
+            ch == '<' || ch == '>' || ch == '|' || ch == ':' || ch == ' ' ||
+            std::iscntrl(static_cast<unsigned char>(ch))) {
+            ch = '_';
+        }
+    }
+}
 const FileData ApolloPresenter::dloadAlbumCover(int id) const {
     std::filesystem::path path = _ar.getAlbumCoverPath(id);
     return _fs.getFile(path);
 }
 bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) {
     std::string name = std::to_string(id) + '_' + _ar.getAlbumById(id).title + fileExtension;
-    std::replace(name.begin(), name.end(), ' ', '_');
+    sanitizeFilename(name);
     std::string path = _fs.saveAlbumCover(name, bytes, size);
     if (path.empty())
         return false;
