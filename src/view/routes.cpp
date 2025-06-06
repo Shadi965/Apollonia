@@ -167,7 +167,8 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
             return statusResponse(415, "fail", "Expected image type");
         
         try {
-            ap.uploadAlbumCover(id, req.body.data(), req.body.size(), ext);
+            if (!ap.uploadAlbumCover(id, req.body.data(), req.body.size(), ext))
+                return statusResponse(500, "error", "Cannot to save image");
         }
         catch(const AlbumNotFoundException& e) {
             return statusResponse(404, "fail", e.what());
@@ -288,7 +289,8 @@ void RoutesManager::regPlaylistRoutes(IPlaylistPresenter& pp) {
             return statusResponse(415, "fail", "Expected image type");
         
         try {
-            pp.uploadPlaylistCover(id, req.body.data(), req.body.size(), ext);
+            if (pp.uploadPlaylistCover(id, req.body.data(), req.body.size(), ext))
+                return statusResponse(500, "error", "Cannot to save image");
         }
         catch(const PlaylistNotFoundException& e) {
             return statusResponse(404, "fail", e.what());
