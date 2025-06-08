@@ -19,6 +19,12 @@
 //
 // CREATE INDEX IF NOT EXISTS idx_lyrics_song_time ON lyrics(song_id, time_ms);
 
+// CREATE VIRTUAL TABLE IF NOT EXISTS lyrics_fts USING fts5(
+//     song_id UNINDEXED,
+//     line,
+//     content='lyrics',
+//     content_rowid='rowid'
+// );
 
 class LyricsDao {
 public:

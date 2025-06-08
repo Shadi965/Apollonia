@@ -25,6 +25,13 @@
 //
 // CREATE INDEX IF NOT EXISTS idx_songs_album_id ON songs(album_id);
 
+// CREATE VIRTUAL TABLE IF NOT EXISTS songs_fts USING fts5(
+//     title,
+//     artist,
+//     content='songs',
+//     content_rowid='id'
+// );
+
 class SongDao {
 public:
     SongDao(SQLite::Database& db);

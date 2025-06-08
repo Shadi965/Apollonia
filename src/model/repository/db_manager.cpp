@@ -29,6 +29,35 @@ void DatabaseManager::createSongs(const std::string& tableName = "songs") {
     );
 }
 
+void DatabaseManager::createSongsFts(const std::string& tableName = "songs") {
+        _db.exec("CREATE VIRTUAL TABLE IF NOT EXISTS " + tableName + "_fts USING fts5("
+        "title, "
+        "artist, "
+        "content='" + tableName + "', "
+        "content_rowid='id');"
+    );
+
+    _db.exec("CREATE TRIGGER IF NOT EXISTS " + tableName + "_ai AFTER INSERT ON " + tableName + " BEGIN "
+        "INSERT INTO " + tableName + "_fts(rowid, title, artist) "
+        "VALUES (new.id, new.title, new.artist);"
+        "END;"
+    );
+
+    _db.exec("CREATE TRIGGER IF NOT EXISTS " + tableName + "_ad AFTER DELETE ON " + tableName + " BEGIN "
+        "INSERT INTO " + tableName + "_fts(" + tableName + "_fts, rowid, title, artist) "
+        "VALUES('delete', old.id, old.title, old.artist);"
+        "END;"
+    );
+
+    _db.exec("CREATE TRIGGER IF NOT EXISTS " + tableName + "_au AFTER UPDATE ON " + tableName + " BEGIN "
+        "INSERT INTO " + tableName + "_fts(" + tableName + "_fts, rowid, title, artist) "
+        "VALUES('delete', old.id, old.title, old.artist);"
+        "INSERT INTO " + tableName + "_fts(rowid, title, artist) "
+        "VALUES (new.id, new.title, new.artist);"
+        "END;"
+    );
+}
+
 void DatabaseManager::createSongsMeta(const std::string& tableName = "songs_meta") {
     _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "song_id INTEGER UNIQUE NOT NULL, "
@@ -78,6 +107,40 @@ void DatabaseManager::createLyrics(const std::string& tableName = "lyrics") {
     );
 }
 
+void DatabaseManager::createLyricsFts(const std::string& tableName = "lyrics") {
+    _db.exec("CREATE VIRTUAL TABLE IF NOT EXISTS " + tableName + "_fts USING fts5("
+        "song_id UNINDEXED, "
+        "line, "
+        "content='" + tableName + "', "
+        "content_rowid='rowid');"
+    );
+
+    _db.exec("CREATE TRIGGER IF NOT EXISTS " + tableName + "_ai AFTER INSERT ON " + tableName + " BEGIN "
+        "INSERT INTO " + tableName + "_fts(rowid, song_id, line) "
+        "VALUES (new.rowid, new.song_id, new.line);"
+        "END;"
+    );
+
+    _db.exec("CREATE TRIGGER IF NOT EXISTS " + tableName + "_ad AFTER DELETE ON " + tableName + " BEGIN "
+        "INSERT INTO " + tableName + "_fts(" + tableName + "_fts, rowid, song_id, line) "
+        "VALUES('delete', old.rowid, old.song_id, old.line);"
+        "END;"
+    );
+
+    _db.exec("CREATE TRIGGER IF NOT EXISTS " + tableName + "_au AFTER UPDATE ON " + tableName + " BEGIN "
+        "INSERT INTO " + tableName + "_fts(" + tableName + "_fts, rowid, song_id, line) "
+        "VALUES('delete', old.rowid, old.song_id, old.line);"
+        "INSERT INTO " + tableName + "_fts(rowid, song_id, line) "
+        "VALUES (new.rowid, new.song_id, new.line);"
+        "END;"
+    );
+}
+
+void DatabaseManager::rebuildFts() {
+    _db.exec("INSERT INTO songs_fts(songs_fts) VALUES('rebuild');");
+    _db.exec("INSERT INTO lyrics_fts(lyrics_fts) VALUES('rebuild');");
+}
+
 void DatabaseManager::createPlaylistSongs(const std::string& tableName = "playlist_songs") {
     _db.exec("CREATE TABLE IF NOT EXISTS " + tableName + " ("
         "playlist_id INTEGER NOT NULL, "
@@ -95,16 +158,17 @@ void DatabaseManager::initDB() {
 
     createAlbums();
     createSongs();
+    createSongsFts();
     createSongsMeta();
     createPlaylists();
     createPlaylistSongs();
     createLyrics();
-    
+    createLyricsFts();
     _db.exec("CREATE TABLE IF NOT EXISTS metadata ("
         "key TEXT PRIMARY KEY, "
         "value TEXT);");
     
-    _db.exec("INSERT OR IGNORE INTO metadata (key, value) VALUES ('db_version', '4');");
+    _db.exec("INSERT OR IGNORE INTO metadata (key, value) VALUES ('db_version', '5');");
 }
 
 int DatabaseManager::getDbVersion() {
