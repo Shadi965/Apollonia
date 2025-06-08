@@ -21,7 +21,8 @@ public:
 
     std::vector<SongEntity> getAllSongs() const override;
     SongEntity getSongById(int id) const override;
-
+    std::vector<int> searchSongs(const std::string& query) const override;
+    
     SongMetaEntity getSongMetaById(int id) const override;
     std::string getSongPathById(int id) const override;
     

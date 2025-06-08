@@ -138,3 +138,29 @@ std::vector<int> SongDao::getSongsFromAlbum(int albumId) const {
     return songIds;
 }
 
+std::vector<int> SongDao::searchSongs(const std::string& query) const {
+    std::vector<int> songIds;
+
+SQLite::Statement stmt(_db, "SELECT id FROM ("
+                                "SELECT songs.id AS id, 2 AS score, bm25(songs_fts, 0.5, 0.8) AS rank "
+                                "FROM songs_fts "
+                                "JOIN songs ON songs_fts.rowid = songs.id "
+                                "WHERE songs_fts MATCH ? "
+
+                                "UNION "
+
+                                "SELECT song_id AS id, 1 AS score, NULL AS rank "
+                                "FROM lyrics_fts "
+                                "WHERE lyrics_fts MATCH ? "
+                            ") "
+                            "GROUP BY id "
+                            "ORDER BY MAX(score) DESC, MIN(rank) ASC NULLS LAST"
+                        );
+    stmt.bind(1, query);
+    stmt.bind(2, query);
+
+    while (stmt.executeStep())
+        songIds.push_back(stmt.getColumn(0).getInt());
+
+    return songIds;
+}

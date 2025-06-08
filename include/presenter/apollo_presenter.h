@@ -22,6 +22,7 @@ public:
 
     const std::vector<Song> getAllSongs() const override;
     const Song getSong(int id) const override;
+    const std::vector<Song> searchSongs(const std::string& query) const override;
 
     const Lyrics getSongLyrics(int songId) const override;
 

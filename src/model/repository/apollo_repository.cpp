@@ -12,6 +12,10 @@ SongEntity ApolloRepository::getSongById(int id) const {
     return _songDao.getSongById(id);
 }
 
+std::vector<int> ApolloRepository::searchSongs(const std::string& query) const {
+    return _songDao.searchSongs(query);
+}
+
 SongMetaEntity ApolloRepository::getSongMetaById(int id) const {
     return _songMetaDao.getSongDataById(id);
 }

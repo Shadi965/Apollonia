@@ -45,6 +45,14 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
     CROW_ROUTE(app, "/songs/")([&sp]() {
         return statusResponse(200, "success", songsJson(sp.getAllSongs()), "data");
     });
+
+    CROW_ROUTE(app, "/songs/search/")([&sp](const crow::request& req) {
+        std::string query = sgetParam(req, "query");
+        if (query.empty())
+            return statusResponse(400, "fail", "Missing 'query' in request");
+        
+        return statusResponse(200, "success", songsJson(sp.searchSongs(query)), "data");
+    });
     
     CROW_ROUTE(app, "/song/<int>")([&sp](int id) {
         try {

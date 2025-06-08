@@ -44,6 +44,8 @@ public:
     std::vector<SongEntity> getTitleArtistAlbumTuples() const;
     std::vector<int> getSongsFromAlbum(int albumId) const;
 
+    std::vector<int> searchSongs(const std::string& query) const;
+
     int insertSong(const SongEntity& song);
     bool deleteSongById(int songId);
 

@@ -21,6 +21,16 @@ const Song ApolloPresenter::getSong(int id) const {
     
     return toSong(song, songMeta);
 }
+const std::vector<Song> ApolloPresenter::searchSongs(const std::string& query) const {
+    std::vector<int> songIds = _sr.searchSongs(query);
+
+    std::vector<Song> songs;
+    for (auto &&id : songIds)
+        songs.push_back(toSong(_sr.getSongById(id), _sr.getSongMetaById(id)));
+
+    return songs;
+}
+
 const Lyrics ApolloPresenter::getSongLyrics(int songId) const {
     std::vector<LyricLineEntity> lyrics = _sr.getSongLyricsById(songId);
 

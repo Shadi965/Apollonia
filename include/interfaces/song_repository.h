@@ -13,6 +13,7 @@ public:
 
     virtual std::vector<SongEntity> getAllSongs() const = 0;
     virtual SongEntity getSongById(int id) const = 0;
+    virtual std::vector<int> searchSongs(const std::string& query) const = 0;
 
     virtual SongMetaEntity getSongMetaById(int id) const = 0;
     virtual std::string getSongPathById(int id) const = 0;
