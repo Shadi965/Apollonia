@@ -24,10 +24,6 @@ private:
 
     void initDB();
     int getDbVersion();
-
-    void v1_to_v2();
-    void v2_to_v3();
-    void v3_to_v4();
 };
 
 

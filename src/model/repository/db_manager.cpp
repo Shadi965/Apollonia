@@ -2,21 +2,8 @@
 #include "dao/playlist_songs.h"
 DatabaseManager::DatabaseManager(const std::string& dbPath) : _db(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
     _db.exec("PRAGMA foreign_keys = ON;");
-    switch (getDbVersion())
-    {
-    case 0:
+    if (getDbVersion() == 0)
         initDB();
-        break;
-    case 1:
-        v1_to_v2();
-    case 2:
-        v2_to_v3();
-    case 3:
-        v3_to_v4();
-        break;
-    default:
-        break;
-    }
 }
 
 SQLite::Database& DatabaseManager::getDb() {
@@ -133,71 +120,4 @@ int DatabaseManager::getDbVersion() {
     }
 
     return 0;
-}
-
-void DatabaseManager::v1_to_v2() {
-    createAlbums("albums_temp");
-    createPlaylists("playlists_temp");
-
-    _db.exec("INSERT INTO albums_temp(id, title, artist, track_count, disc_count, compilation, date, copyright, genre, cover_path) " 
-        "SELECT id, title, artist, track_count, disc_count, "
-        "CASE WHEN compilation != 0 THEN 1 ELSE 0 END AS compilation, "
-        "date, copyright, genre, NULL "
-        "FROM albums");
-
-    _db.exec("INSERT INTO playlists_temp(id, name, cover_path) " 
-        "SELECT id, name, NULL "
-        "FROM playlists");
-
-    _db.exec("DROP TABLE albums; " 
-        "ALTER TABLE albums_temp RENAME to albums;");
-
-    _db.exec("DROP TABLE playlists; " 
-        "ALTER TABLE playlists_temp RENAME to playlists;");
-
-    _db.exec("UPDATE metadata SET value = '2' WHERE key = 'db_version';");
-
-}
-
-void DatabaseManager::v2_to_v3() {
-    createSongs("songs_temp");
-    createSongsMeta("songs_meta_temp");
-    createLyrics("lyrics_temp");
-
-    
-    _db.exec("INSERT INTO songs_temp " 
-        "SELECT * FROM songs");
-    _db.exec("INSERT INTO songs_meta_temp " 
-        "SELECT * FROM songs_meta");
-    _db.exec("INSERT INTO lyrics_temp " 
-        "SELECT * FROM lyrics");
-
-        
-    _db.exec("DROP TABLE songs; " 
-        "ALTER TABLE songs_temp RENAME to songs;");
-    _db.exec("DROP TABLE songs_meta; " 
-        "ALTER TABLE songs_meta_temp RENAME to songs_meta;");
-    _db.exec("DROP TABLE lyrics; " 
-        "ALTER TABLE lyrics_temp RENAME to lyrics;");
-
-        
-    _db.exec("UPDATE metadata SET value = '3' WHERE key = 'db_version';");
-}
-
-void DatabaseManager::v3_to_v4() {
-    PlaylistSongDao playlistSongDao(_db);
-    createPlaylistSongs("playlist_songs_temp");
-
-    _db.exec("INSERT INTO playlist_songs_temp " 
-        "SELECT playlist_id, song_id, NULL FROM playlist_songs");
-
-    _db.exec("DROP TABLE playlist_songs; " 
-        "ALTER TABLE playlist_songs_temp RENAME to playlist_songs;");
-
-    _db.exec("UPDATE metadata SET value = '4' WHERE key = 'db_version';");
-
-    SQLite::Statement query(_db, "SELECT id FROM playlists");
-    while (query.executeStep()) {
-        playlistSongDao.spreadOutPositions(query.getColumn(0).getInt());
-    }
 }
