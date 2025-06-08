@@ -3,7 +3,7 @@ FROM ubuntu@sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376a
 COPY ./build/Apollonia /usr/local/bin/Apollonia
 RUN apt update \
     && apt upgrade -y \
-    && apt install libavformat-dev -y\
+    && apt install libavformat-dev libsqlite3-dev -y\
     && rm -rf /var/lib/apt/lists/*
 
 
