@@ -1,5 +1,11 @@
 #include "apollo_repository.h"
 
+#include <cmath>
+
+static bool needRecomposition(double position);
+
+
+
 ApolloRepository::ApolloRepository(SQLite::Database& db) 
 : _songDao(db), _songMetaDao(db), _lyricsDao(db), _albumDao(db), _playlistDao(db), _playlistSongDao(db) {}
 
@@ -72,8 +78,7 @@ bool ApolloRepository::deletePlaylist(int playlistId) {
 
 bool ApolloRepository::addSongToPlaylist(int playlistId, int songId, double position) {
     bool result = _playlistSongDao.addSongToPlaylist(playlistId, songId, position);
-    double fraction = position - (int)position;
-    if (fraction < 1.0e-6)
+    if (result && needRecomposition(position))
         _playlistSongDao.spreadOutPositions(playlistId);
     return result;
 }
@@ -83,7 +88,10 @@ bool ApolloRepository::removeSongFromPlaylist(int playlistId, int songId) {
 }
 
 bool ApolloRepository::updateSongPosition(int playlistId, int songId, double position) {
-    return _playlistSongDao.updateSongPosition(playlistId, songId, position);
+    bool result = _playlistSongDao.updateSongPosition(playlistId, songId, position);
+    if (result && needRecomposition(position))
+        _playlistSongDao.spreadOutPositions(playlistId);
+    return result;
 }
 
 static bool needRecomposition(double position) {
