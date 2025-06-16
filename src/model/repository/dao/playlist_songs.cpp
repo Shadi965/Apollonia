@@ -78,6 +78,10 @@ void PlaylistSongDao::spreadOutPositions(int playlistId, double startPosition, d
         songIds.push_back(songs.getColumn(0).getInt());
     }
 
+    SQLite::Statement setNull(_db, "UPDATE playlist_songs SET position = NULL WHERE playlist_id = ?");
+    setNull.bind(1, playlistId);
+    setNull.exec();
+
     SQLite::Statement spread(_db, "UPDATE playlist_songs SET position = ? WHERE playlist_id = ? AND song_id = ?");
     for (int songId : songIds) {
         spread.bind(1, startPosition);
