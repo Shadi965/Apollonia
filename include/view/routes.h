@@ -42,6 +42,7 @@ private:
 
     static std::string parseStrKey(const crow::request& req, const std::string& key);
     static int parseIntKey(const crow::request& req, const std::string& key);
+    static std::vector<int> parseIntList(const crow::request& req, const std::string& key);
 
     static std::string parseImgFileExt(const crow::request& req);
     static std::string imageTypeByExtension(const std::string& extension);

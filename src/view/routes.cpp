@@ -46,6 +46,12 @@ void RoutesManager::regSongRoutes(const ISongPresenter& sp) {
         return statusResponse(200, "success", songsJson(sp.getAllSongs()), "data");
     });
 
+    CROW_ROUTE(app, "/songs/list").methods(crow::HTTPMethod::POST)
+    ([&sp](const crow::request& req) {
+        std::vector<int> songs = parseIntList(req, "songs_ids");
+        return statusResponse(200, "success", songsJson(sp.getSongs(songs)), "data");
+    });
+
     CROW_ROUTE(app, "/songs/search/")([&sp](const crow::request& req) {
         std::string query = sgetParam(req, "query");
         if (query.empty())
@@ -497,6 +503,26 @@ int RoutesManager::parseIntKey(const crow::request& req, const std::string& key)
     catch(const std::runtime_error& e) {
         return 0;
     }
+}
+
+std::vector<int> RoutesManager::parseIntList(const crow::request& req, const std::string& key) {
+    std::vector<int> result;
+    auto body = crow::json::load(req.body);
+    if (!body.has(key)) {
+        return result;
+    }
+
+    try {
+        const auto& arr = body[key];
+        if (arr.t() == crow::json::type::List)
+            for (const auto& item : arr)
+                    result.push_back(item.i());
+    }
+    catch(const std::runtime_error& e) {
+        return std::vector<int>();
+    }
+
+    return result;
 }
 
 std::string RoutesManager::parseImgFileExt(const crow::request& req) {
