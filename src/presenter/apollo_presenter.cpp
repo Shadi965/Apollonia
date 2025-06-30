@@ -70,6 +70,14 @@ const Album ApolloPresenter::getAlbum(int id) const {
     return toAlbum(_ar.getAlbumById(id));
 }
 
+const std::vector<Album> ApolloPresenter::getAlbums(const std::vector<int> ids) const {
+    std::vector<Album> albums;
+    for (auto &&i : ids) {
+        albums.push_back(getAlbum(i));
+    }
+    return albums;
+}
+
 
 static void sanitizeFilename(std::string& name) {
     for (char& ch : name) {

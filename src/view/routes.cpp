@@ -174,6 +174,12 @@ void RoutesManager::regAlbumRoutes(IAlbumPresenter& ap) {
         }
     });
 
+    CROW_ROUTE(app, "/albums/list").methods(crow::HTTPMethod::POST)
+    ([&ap](const crow::request& req) {
+        std::vector<int> albums = parseIntList(req, "albums_ids");
+        return statusResponse(200, "success", albumsJson(ap.getAlbums(albums)), "data");
+    });
+
     CROW_ROUTE(app, "/album/cover/<int>").methods(crow::HTTPMethod::PUT)
     ([&ap](const crow::request& req, int id) {
         std::string ext = parseImgFileExt(req);

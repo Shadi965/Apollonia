@@ -32,6 +32,7 @@ public:
 
     const std::vector<Album> getAllAlbums() const override;
     const Album getAlbum(int id) const override;
+    const std::vector<Album> getAlbums(const std::vector<int> ids) const override;
 
     const FileData dloadAlbumCover(int id) const override;
     bool uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) override;
