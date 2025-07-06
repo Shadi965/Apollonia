@@ -37,6 +37,10 @@ public:
 
     virtual const std::vector<Song> getAllSongs() const = 0;
     virtual const Song getSong(int id) const = 0;
+    virtual const std::vector<Song> getSongs(const std::vector<int> ids) const = 0;
+
+
+    virtual const std::vector<Song> searchSongs(const std::string& query) const = 0;
 
     virtual const Lyrics getSongLyrics(int songId) const = 0;
 

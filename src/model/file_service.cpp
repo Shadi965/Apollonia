@@ -20,16 +20,16 @@ std::string FileService::savePlaylistCover(const std::string& name, const char* 
 
     std::ofstream outFile(filePath, std::ios::binary | std::ios::trunc);
 
-    if (!outFile)
+    if (!outFile.is_open())
         return "";
     
     outFile.write(bytes, size);
 
-    if (!outFile)
+    if (outFile.fail())
         return "";
     
     outFile.close();
-    return std::filesystem::absolute(filePath);
+    return std::filesystem::absolute(filePath).string();
 }
 
 std::string FileService::saveAlbumCover(const std::string& name, const char* bytes, std::streamsize size) {
@@ -37,16 +37,16 @@ std::string FileService::saveAlbumCover(const std::string& name, const char* byt
 
     std::ofstream outFile(filePath, std::ios::binary | std::ios::trunc);
 
-    if (!outFile)
+    if (!outFile.is_open())
         return "";
     
     outFile.write(bytes, size);
 
-    if (!outFile)
+    if (outFile.fail())
         return "";
     
     outFile.close();
-    return std::filesystem::absolute(filePath);
+    return std::filesystem::absolute(filePath).string();
 }
 
 const FileData FileService::getFile(std::filesystem::path path) const {

@@ -3,6 +3,7 @@
 
 #include "db_manager.h"
 #include "albums.h"
+#include "songs.h"
 
 #define DB_NAME ":memory:"
 
@@ -11,8 +12,9 @@ protected:
     DatabaseManager dbManager;
     SQLite::Database& db;
     AlbumDao albumDao;
+    SongDao songDao;
 
-    AlbumDaoTest() : dbManager(DB_NAME), db(dbManager.getDb()), albumDao(db) {}
+    AlbumDaoTest() : dbManager(DB_NAME), db(dbManager.getDb()), albumDao(db), songDao(db) {}
 
     void TearDown() override {
         db.exec("DELETE FROM albums; VACUUM;");
@@ -211,4 +213,24 @@ TEST_F(AlbumDaoTest, UpdateAlbumTrackCount) {
 
     AlbumEntity updatedAlbum = albumDao.getAlbumById(albumId);
     EXPECT_EQ(updatedAlbum.track_count, newTrackCount);
+}
+
+TEST_F(AlbumDaoTest, GetSongsFromAlbum) {
+    AlbumEntity album = {1, "Test Album", "Test Artist", 10, 1, false, "2025-04-13", "Test Copyright", "Test Genre", "/home/test.jpg"};
+    
+    int albumId = albumDao.insertAlbum(album);
+
+    std::vector<int> songIds = albumDao.getSongsFromAlbum(1);
+    EXPECT_EQ(songIds.size(), 0);
+
+    SongEntity song1{1, "Test Song 1", "Test Artist", "Test Composer", 1, 1, 1, "2025-04-13", "Test Copyright", "Test Genre"};
+    SongEntity song2{2, "Test Song 2", "Test Artist", "Test Composer", 1, 2, 1, "2025-04-13", "Test Copyright", "Test Genre"};
+
+    int song1Id = songDao.insertSong(song1);
+    int song2Id = songDao.insertSong(song2);
+
+    songIds = albumDao.getSongsFromAlbum(albumId);
+    EXPECT_EQ(songIds.size(), 2);
+    EXPECT_EQ(songIds[0], song1Id);
+    EXPECT_EQ(songIds[1], song2Id);
 }

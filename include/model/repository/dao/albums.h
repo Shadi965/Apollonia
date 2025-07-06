@@ -41,6 +41,8 @@ public:
     bool updateAlbumCoverPath(int id, const std::string& coverPath);
     bool updateAlbumTrackCount(int id, int trackCount);
 
+    std::vector<int> getSongsFromAlbum(int albumId) const;
+
 private:
     SQLite::Database& _db;
 };

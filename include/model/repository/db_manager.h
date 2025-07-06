@@ -16,17 +16,18 @@ private:
 
 
     void createSongs(const std::string& tableName);
+    void createSongsFts(const std::string& tableName);
     void createSongsMeta(const std::string& tableName);
     void createAlbums(const std::string& tableName);
     void createPlaylists(const std::string& tableName);
     void createLyrics(const std::string& tableName);
+    void createLyricsFts(const std::string& tableName);
     void createPlaylistSongs(const std::string& tableName);
 
-    void initDB();
-    int checkVersion();
+    void rebuildFts();
 
-    void v1_to_v2();
-    void v2_to_v3();
+    void initDB();
+    int getDbVersion();
 };
 
 

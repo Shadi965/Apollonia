@@ -35,13 +35,14 @@ private:
     static crow::json::wvalue lyricsJson(const Lyrics& lyrics);
 
     static crow::json::wvalue albumsJson(const std::vector<Album>& albums);
-    static crow::json::wvalue albumsJson(const Album album);
+    static crow::json::wvalue albumsJson(const Album& album);
 
     static crow::json::wvalue playlistsJson(const Playlist& playlist);
     static crow::json::wvalue playlistsJson(const std::vector<Playlist>& playlists);
 
     static std::string parseStrKey(const crow::request& req, const std::string& key);
     static int parseIntKey(const crow::request& req, const std::string& key);
+    static std::vector<int> parseIntList(const crow::request& req, const std::string& key);
 
     static std::string parseImgFileExt(const crow::request& req);
     static std::string imageTypeByExtension(const std::string& extension);

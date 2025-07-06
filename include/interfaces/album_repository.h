@@ -16,6 +16,8 @@ public:
 
     virtual std::string getAlbumCoverPath(int id) const = 0;
     virtual bool updateAlbumCoverPath(int id, const std::string& coverPath) = 0;
+
+    virtual std::vector<int> getAlbumSongs(int id) const = 0;
     
 };
 

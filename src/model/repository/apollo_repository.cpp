@@ -1,5 +1,11 @@
 #include "apollo_repository.h"
 
+#include <cmath>
+
+static bool needRecomposition(double position);
+
+
+
 ApolloRepository::ApolloRepository(SQLite::Database& db) 
 : _songDao(db), _songMetaDao(db), _lyricsDao(db), _albumDao(db), _playlistDao(db), _playlistSongDao(db) {}
 
@@ -10,6 +16,10 @@ std::vector<SongEntity> ApolloRepository::getAllSongs() const {
 }
 SongEntity ApolloRepository::getSongById(int id) const {
     return _songDao.getSongById(id);
+}
+
+std::vector<int> ApolloRepository::searchSongs(const std::string& query) const {
+    return _songDao.searchSongs(query);
 }
 
 SongMetaEntity ApolloRepository::getSongMetaById(int id) const {
@@ -40,6 +50,9 @@ bool ApolloRepository::updateAlbumCoverPath(int id, const std::string& coverPath
     return _albumDao.updateAlbumCoverPath(id, coverPath);
 }
 
+std::vector<int> ApolloRepository::getAlbumSongs(int id) const {
+    return _albumDao.getSongsFromAlbum(id);
+}
 
 
 std::vector<PlaylistEntity> ApolloRepository::getAllPlaylists() const {
@@ -49,8 +62,8 @@ PlaylistEntity ApolloRepository::getPlaylistById(int id) const {
     return _playlistDao.getPlaylistById(id);
 }
 
-std::vector<int> ApolloRepository::getPlaylistSongs(int id) const {
-    return _playlistSongDao.getSongsInPlaylist(id);
+std::vector<std::pair<int, double>> ApolloRepository::getPlaylistSongs(int id) const {
+    return _playlistSongDao.getSongsFromPlaylist(id);
 }
 
 int ApolloRepository::createPlaylist(const std::string name) {
@@ -63,12 +76,44 @@ bool ApolloRepository::deletePlaylist(int playlistId) {
     return _playlistDao.deletePlaylist(playlistId);
 }
 
-bool ApolloRepository::addSongToPlaylist(int playlistId, int songId) {
-    return _playlistSongDao.addSongToPlaylist(playlistId, songId);
+bool ApolloRepository::addSongToPlaylist(int playlistId, int songId, double position) {
+    bool result = _playlistSongDao.addSongToPlaylist(playlistId, songId, position);
+    if (result && needRecomposition(position))
+        _playlistSongDao.spreadOutPositions(playlistId);
+    return result;
 }
+
 bool ApolloRepository::removeSongFromPlaylist(int playlistId, int songId) {
     return _playlistSongDao.removeSongFromPlaylist(playlistId, songId);
 }
+
+bool ApolloRepository::updateSongPosition(int playlistId, int songId, double position) {
+    bool result = _playlistSongDao.updateSongPosition(playlistId, songId, position);
+    if (result && needRecomposition(position))
+        _playlistSongDao.spreadOutPositions(playlistId);
+    return result;
+}
+
+static bool needRecomposition(double position) {
+    double scaled = position * 1000.0;
+    return std::abs(scaled - (int)scaled) > 1.0e-3;
+}
+
+std::vector<PlaylistSongEntity> ApolloRepository::addSongsToPlaylist(std::vector<PlaylistSongEntity>& songs) {
+    int playlistId = songs[0].playlist_id;
+    std::vector<PlaylistSongEntity> notAdded;
+    bool recomposition = false;
+    for (auto& song : songs) {
+        if (!recomposition && needRecomposition(song.position))
+            recomposition = true;
+        if (!_playlistSongDao.addSongToPlaylist(playlistId, song.song_id, song.position))
+            notAdded.push_back(song);
+    }
+    if (recomposition)
+        _playlistSongDao.spreadOutPositions(playlistId);
+    return notAdded;
+}
+
 
 std::string ApolloRepository::getPlaylistCoverPath(int id) const {
     return _playlistDao.getPlaylistCoverPathById(id);

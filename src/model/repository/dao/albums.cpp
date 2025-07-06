@@ -135,3 +135,16 @@ bool AlbumDao::updateAlbumTrackCount(int id, int trackCount) {
 
     return _db.getChanges() != 0;
 }
+
+std::vector<int> AlbumDao::getSongsFromAlbum(int albumId) const {
+    std::vector<int> songIds;
+    SQLite::Statement query(_db, "SELECT id FROM songs WHERE album_id = ?");
+    query.bind(1, albumId);
+
+    while (query.executeStep())  {
+        songIds.push_back(query.getColumn(0).getInt());
+    }
+
+    return songIds;
+}
+    

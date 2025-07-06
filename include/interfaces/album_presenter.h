@@ -28,10 +28,13 @@ public:
     
     virtual const std::vector<Album> getAllAlbums() const = 0;
     virtual const Album getAlbum(int id) const = 0;
+    virtual const std::vector<Album> getAlbums(const std::vector<int> ids) const = 0;
+
 
     virtual const FileData dloadAlbumCover(int id) const = 0;
     virtual bool uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) = 0;
 
+    virtual const std::vector<int> getAlbumSongs(int albumId) const = 0;
 };
 
 #endif // I_ALBUM_PRESENTER_H

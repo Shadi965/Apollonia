@@ -31,6 +31,12 @@ protected:
 
         db.exec("INSERT OR IGNORE INTO songs (title, artist, composer, album_id, track, disc, date, copyright, genre) "
         "VALUES ('Test Song2', 'Test Artist', 'Test Composer', NULL, 1, 1, '2025-04-13', 'Test Copyright', 'Test Genre')");
+
+        db.exec("INSERT OR IGNORE INTO songs (title, artist, composer, album_id, track, disc, date, copyright, genre) "
+        "VALUES ('Test Song3', 'Test Artist', 'Test Composer', NULL, 1, 1, '2025-04-13', 'Test Copyright', 'Test Genre')");
+
+        db.exec("INSERT OR IGNORE INTO songs (title, artist, composer, album_id, track, disc, date, copyright, genre) "
+        "VALUES ('Test Song4', 'Test Artist', 'Test Composer', NULL, 1, 1, '2025-04-13', 'Test Copyright', 'Test Genre')");
     }
 
     void TearDown() override {
@@ -41,50 +47,58 @@ protected:
 
 TEST_F(PlaylistSongDaoTest, AddSongToPlaylist) {
     
-    ASSERT_TRUE(pSongDao.addSongToPlaylist(1, 1));
-    ASSERT_TRUE(pSongDao.addSongToPlaylist(1, 2));
-    ASSERT_TRUE(pSongDao.addSongToPlaylist(2, 2));
-    ASSERT_TRUE(pSongDao.addSongToPlaylist(2, 3));
+    ASSERT_TRUE(pSongDao.addSongToPlaylist(1, 1, 0.0));
+    ASSERT_TRUE(pSongDao.addSongToPlaylist(1, 2, 1.0));
+    ASSERT_TRUE(pSongDao.addSongToPlaylist(2, 2, 0.0));
+    ASSERT_TRUE(pSongDao.addSongToPlaylist(2, 3, 1.0));
+    ASSERT_TRUE(pSongDao.addSongToPlaylist(2, 4, 1.0E-6));
 
     SQLite::Statement count(db, "SELECT COUNT(*) FROM playlist_songs;");
     count.executeStep();
-    ASSERT_EQ(count.getColumn(0).getInt(), 4);
+    ASSERT_EQ(count.getColumn(0).getInt(), 5);
 
     SQLite::Statement query(db, "SELECT * FROM playlist_songs WHERE playlist_id = ? AND song_id = ?");
     query.bind(1, 1);
     query.bind(2, 1);
     ASSERT_TRUE(query.executeStep());
+    ASSERT_EQ(query.getColumn(2).getDouble(), 0.0);
     query.reset();
     query.bind(1, 1);
     query.bind(2, 2);
     ASSERT_TRUE(query.executeStep());
+    ASSERT_EQ(query.getColumn(2).getDouble(), 1.0);
     query.reset();
     query.bind(1, 2);
     query.bind(2, 2);
     ASSERT_TRUE(query.executeStep());
+    ASSERT_EQ(query.getColumn(2).getDouble(), 0.0);
     query.reset();
     query.bind(1, 2);
     query.bind(2, 3);
     ASSERT_TRUE(query.executeStep());
+    ASSERT_EQ(query.getColumn(2).getDouble(), 1.0);
 
-    ASSERT_FALSE(pSongDao.addSongToPlaylist(1, 1));
-    ASSERT_FALSE(pSongDao.addSongToPlaylist(2, 3));
+    ASSERT_FALSE(pSongDao.addSongToPlaylist(1, 1, 0.0));
+    ASSERT_FALSE(pSongDao.addSongToPlaylist(2, 3, 1.0));
 
-    ASSERT_FALSE(pSongDao.addSongToPlaylist(5, 7));
-    ASSERT_FALSE(pSongDao.addSongToPlaylist(6, 8));
+    ASSERT_FALSE(pSongDao.addSongToPlaylist(1, 3, 0.0));
+    ASSERT_FALSE(pSongDao.addSongToPlaylist(2, 5, 1.0E-6));
+
+    ASSERT_FALSE(pSongDao.addSongToPlaylist(5, 7, 0.0));
+    ASSERT_FALSE(pSongDao.addSongToPlaylist(6, 8, 1.0));
 
     count.reset();
     count.executeStep();
-    ASSERT_EQ(count.getColumn(0).getInt(), 4);
+    ASSERT_EQ(count.getColumn(0).getInt(), 5);
 }
 TEST_F(PlaylistSongDaoTest, RemoveSongFromPlaylist) {
     ASSERT_FALSE(pSongDao.removeSongFromPlaylist(1, 1));
     ASSERT_FALSE(pSongDao.removeSongFromPlaylist(6, 9));
     
-    pSongDao.addSongToPlaylist(1, 1);
-    pSongDao.addSongToPlaylist(1, 2);
-    pSongDao.addSongToPlaylist(2, 2);
-    pSongDao.addSongToPlaylist(2, 3);
+    pSongDao.addSongToPlaylist(1, 1, 0.0);
+    pSongDao.addSongToPlaylist(1, 2, 1.0);
+    pSongDao.addSongToPlaylist(2, 2, 0.0);
+    pSongDao.addSongToPlaylist(2, 3, 1.0);
 
     SQLite::Statement count(db, "SELECT COUNT(*) FROM playlist_songs;");
     count.executeStep();
@@ -106,45 +120,68 @@ TEST_F(PlaylistSongDaoTest, RemoveSongFromPlaylist) {
     ASSERT_EQ(count.getColumn(0).getInt(), 2);
 }
 
-TEST_F(PlaylistSongDaoTest, GetSongsInPlaylist) {
-    std::vector<int> pSongs = pSongDao.getSongsInPlaylist(1);
+TEST_F(PlaylistSongDaoTest, GetSongsFromPlaylist) {
+    std::vector<std::pair<int, double>> pSongs = pSongDao.getSongsFromPlaylist(1);
     ASSERT_EQ(pSongs.size(), 0);
-    pSongs = pSongDao.getSongsInPlaylist(5);
+    pSongs = pSongDao.getSongsFromPlaylist(5);
     ASSERT_EQ(pSongs.size(), 0);
 
-    pSongDao.addSongToPlaylist(1, 1);
-    pSongDao.addSongToPlaylist(1, 2);
-    pSongDao.addSongToPlaylist(1, 3);
-    pSongDao.addSongToPlaylist(2, 2);
-    pSongDao.addSongToPlaylist(2, 3);
+    pSongDao.addSongToPlaylist(1, 1, 0.0);
+    pSongDao.addSongToPlaylist(1, 2, 1.0);
+    pSongDao.addSongToPlaylist(1, 3, 2.0);
+    pSongDao.addSongToPlaylist(2, 2, 0.0);
+    pSongDao.addSongToPlaylist(2, 3, 1.0);
 
-    pSongs = pSongDao.getSongsInPlaylist(1);
+    pSongs = pSongDao.getSongsFromPlaylist(1);
     ASSERT_EQ(pSongs.size(), 3);
-    EXPECT_EQ(pSongs[0], 1);
-    EXPECT_EQ(pSongs[1], 2);
-    EXPECT_EQ(pSongs[2], 3);
+    EXPECT_EQ(pSongs[0].first, 1);
+    EXPECT_EQ(pSongs[0].second, 0.0);
+    EXPECT_EQ(pSongs[1].first, 2);
+    EXPECT_EQ(pSongs[1].second, 1.0);
+    EXPECT_EQ(pSongs[2].first, 3);
+    EXPECT_EQ(pSongs[2].second, 2.0);
 
-    pSongs = pSongDao.getSongsInPlaylist(2);
+    pSongs = pSongDao.getSongsFromPlaylist(2);
     ASSERT_EQ(pSongs.size(), 2);
-    EXPECT_EQ(pSongs[0], 2);
-    EXPECT_EQ(pSongs[1], 3);
+    EXPECT_EQ(pSongs[0].first, 2);
+    EXPECT_EQ(pSongs[0].second, 0.0);
+    EXPECT_EQ(pSongs[1].first, 3);
+    EXPECT_EQ(pSongs[1].second, 1.0);
+}
+
+TEST_F(PlaylistSongDaoTest, UpdateSongPosition) {
+    ASSERT_FALSE(pSongDao.updateSongPosition(1, 1, 0.0));
+    ASSERT_FALSE(pSongDao.updateSongPosition(6, 9, 1.0));
+
+    pSongDao.addSongToPlaylist(1, 1, 0.0);
+    pSongDao.addSongToPlaylist(1, 2, 1.0);
+
+    ASSERT_TRUE(pSongDao.updateSongPosition(1, 1, 2.0));
+    ASSERT_TRUE(pSongDao.updateSongPosition(1, 2, 0.0));
+
+    std::vector<std::pair<int, double>> pSongs = pSongDao.getSongsFromPlaylist(1);
+    ASSERT_EQ(pSongs.size(), 2);
+    EXPECT_EQ(pSongs[0].first, 2);
+    EXPECT_EQ(pSongs[0].second, 0.0);
+    EXPECT_EQ(pSongs[1].first, 1);
+    EXPECT_EQ(pSongs[1].second, 2.0);
 }
 
 TEST_F(PlaylistSongDaoTest, OnDeleteCascade) {    
-    pSongDao.addSongToPlaylist(1, 1);
-    pSongDao.addSongToPlaylist(1, 2);
-    pSongDao.addSongToPlaylist(1, 3);
-    pSongDao.addSongToPlaylist(2, 2);
-    pSongDao.addSongToPlaylist(2, 3);
+    pSongDao.addSongToPlaylist(1, 1, 0.0);
+    pSongDao.addSongToPlaylist(1, 2, 1.0);
+    pSongDao.addSongToPlaylist(1, 3, 2.0);
+    pSongDao.addSongToPlaylist(2, 2, 0.0);
+    pSongDao.addSongToPlaylist(2, 3, 1.0);
 
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(1).size(), 3);
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(2).size(), 2);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(1).size(), 3);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(2).size(), 2);
 
     db.exec("DELETE FROM songs WHERE id = 2");
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(1).size(), 2);
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(2).size(), 1);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(1).size(), 2);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(2).size(), 1);
 
     db.exec("DELETE FROM playlists WHERE id = 1");
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(1).size(), 0);
-    ASSERT_EQ(pSongDao.getSongsInPlaylist(2).size(), 1);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(1).size(), 0);
+    ASSERT_EQ(pSongDao.getSongsFromPlaylist(2).size(), 1);
 }

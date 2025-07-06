@@ -21,6 +21,23 @@ const Song ApolloPresenter::getSong(int id) const {
     
     return toSong(song, songMeta);
 }
+const std::vector<Song> ApolloPresenter::getSongs(const std::vector<int> ids) const {
+    std::vector<Song> songs;
+    for (auto &&i : ids) {
+        songs.push_back(getSong(i));
+    }
+    return songs;
+}
+const std::vector<Song> ApolloPresenter::searchSongs(const std::string& query) const {
+    std::vector<int> songIds = _sr.searchSongs(query);
+
+    std::vector<Song> songs;
+    for (auto &&id : songIds)
+        songs.push_back(toSong(_sr.getSongById(id), _sr.getSongMetaById(id)));
+
+    return songs;
+}
+
 const Lyrics ApolloPresenter::getSongLyrics(int songId) const {
     std::vector<LyricLineEntity> lyrics = _sr.getSongLyricsById(songId);
 
@@ -53,13 +70,31 @@ const Album ApolloPresenter::getAlbum(int id) const {
     return toAlbum(_ar.getAlbumById(id));
 }
 
+const std::vector<Album> ApolloPresenter::getAlbums(const std::vector<int> ids) const {
+    std::vector<Album> albums;
+    for (auto &&i : ids) {
+        albums.push_back(getAlbum(i));
+    }
+    return albums;
+}
+
+
+static void sanitizeFilename(std::string& name) {
+    for (char& ch : name) {
+        if (ch == '/' || ch == '\\' || ch == '*' || ch == '?' || ch == '"' ||
+            ch == '<' || ch == '>' || ch == '|' || ch == ':' || ch == ' ' ||
+            std::iscntrl(static_cast<unsigned char>(ch))) {
+            ch = '_';
+        }
+    }
+}
 const FileData ApolloPresenter::dloadAlbumCover(int id) const {
     std::filesystem::path path = _ar.getAlbumCoverPath(id);
     return _fs.getFile(path);
 }
 bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsize size, std::string fileExtension) {
     std::string name = std::to_string(id) + '_' + _ar.getAlbumById(id).title + fileExtension;
-    std::replace(name.begin(), name.end(), ' ', '_');
+    sanitizeFilename(name);
     std::string path = _fs.saveAlbumCover(name, bytes, size);
     if (path.empty())
         return false;
@@ -67,6 +102,9 @@ bool ApolloPresenter::uploadAlbumCover(int id, const char* bytes, std::streamsiz
     return _ar.updateAlbumCoverPath(id, path);
 }
 
+const std::vector<int> ApolloPresenter::getAlbumSongs(int albumId) const {
+    return _ar.getAlbumSongs(albumId);
+}
 
 
 const std::vector<Playlist> ApolloPresenter::getAllPlaylists() const {
@@ -75,14 +113,14 @@ const std::vector<Playlist> ApolloPresenter::getAllPlaylists() const {
     std::vector<Playlist> playlists;
     playlists.reserve(peList.size());
     for (auto &&pe : peList)
-        playlists.push_back(toPlaylist(pe, _pr.getPlaylistSongs(pe.id)));
+        playlists.push_back(toPlaylist(pe));
 
     return playlists;
 }
 const Playlist ApolloPresenter::getPlaylist(int id) const {
     PlaylistEntity pe = _pr.getPlaylistById(id);
     
-    return toPlaylist(pe, _pr.getPlaylistSongs(id));
+    return toPlaylist(pe);
 }
 int ApolloPresenter::createPlaylist(const std::string name) {
     return _pr.createPlaylist(name);
@@ -93,11 +131,27 @@ bool ApolloPresenter::renamePlaylist(int playlistId, const std::string newName) 
 bool ApolloPresenter::deletePlaylist(int playlistId) {
     return _pr.deletePlaylist(playlistId);
 }
-bool ApolloPresenter::addSongToPlaylist(int playlistId, int songId){
-    return _pr.addSongToPlaylist(playlistId, songId);
+bool ApolloPresenter::addSongToPlaylist(int playlistId, int songId, double position){
+    return _pr.addSongToPlaylist(playlistId, songId, position);
 }
 bool ApolloPresenter::removeSongFromPlaylist(int playlistId, int songId){
     return _pr.removeSongFromPlaylist(playlistId, songId);
+}
+bool ApolloPresenter::updateSongPosition(int playlistId, int songId, double position) {
+    return _pr.updateSongPosition(playlistId, songId, position);
+}
+
+std::vector<int> ApolloPresenter::addSongsToPlaylist(int playlistId, std::vector<std::pair<int, double>>& positionedSongs) {
+    std::vector<PlaylistSongEntity> psList;
+    for (auto &&[songId, position] : positionedSongs)
+        psList.push_back({playlistId, songId, position});
+    
+    std::vector<PlaylistSongEntity> notAdded = _pr.addSongsToPlaylist(psList);
+    std::vector<int> notAddedIds;
+    for (auto &&ps : notAdded)
+        notAddedIds.push_back(ps.song_id);
+    
+    return notAddedIds;
 }
 
 const FileData ApolloPresenter::dloadPlaylistCover(int id) const {
@@ -114,7 +168,9 @@ bool ApolloPresenter::uploadPlaylistCover(int id, const char* bytes, std::stream
     return _pr.updatePlaylistCoverPath(id, path);
 }
 
-
+const std::vector<std::pair<int, double>> ApolloPresenter::getPlaylistSongs(int playlistId) const {
+    return _pr.getPlaylistSongs(playlistId);
+}
 
 
 Song ApolloPresenter::toSong(const SongEntity &se, const SongMetaEntity &sme) {
@@ -148,6 +204,6 @@ Album ApolloPresenter::toAlbum(const AlbumEntity &ae) {
         ae.genre
     };
 }
-Playlist ApolloPresenter::toPlaylist(const PlaylistEntity &pe, const std::vector<int>&& songs) {   
-    return {pe.id, pe.name, songs};
+Playlist ApolloPresenter::toPlaylist(const PlaylistEntity &pe) {   
+    return {pe.id, pe.name};
 }

@@ -25,6 +25,13 @@
 //
 // CREATE INDEX IF NOT EXISTS idx_songs_album_id ON songs(album_id);
 
+// CREATE VIRTUAL TABLE IF NOT EXISTS songs_fts USING fts5(
+//     title,
+//     artist,
+//     content='songs',
+//     content_rowid='id'
+// );
+
 class SongDao {
 public:
     SongDao(SQLite::Database& db);
@@ -36,6 +43,8 @@ public:
     std::string getMostFrequentGenreInAlbum(int albumId) const;
     std::vector<SongEntity> getTitleArtistAlbumTuples() const;
     std::vector<int> getSongsFromAlbum(int albumId) const;
+
+    std::vector<int> searchSongs(const std::string& query) const;
 
     int insertSong(const SongEntity& song);
     bool deleteSongById(int songId);
